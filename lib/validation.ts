@@ -6,6 +6,15 @@ export const emailSchema = z
   .min(1, "Имейлът е задължителен")
   .email("Моля, въведете валиден имейл");
 
+// Username validation schema (optional)
+export const usernameSchema = z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || val.length >= 2,
+    "Потребителското име трябва да бъде поне 2 символа"
+  );
+
 // Password validation schema
 export const passwordSchema = z
   .string()
@@ -22,6 +31,7 @@ export const loginSchema = z.object({
 export const signupSchema = z
   .object({
     email: emailSchema,
+    username: usernameSchema,
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Моля, потвърдете паролата"),
   })

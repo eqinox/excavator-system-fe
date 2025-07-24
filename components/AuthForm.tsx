@@ -16,6 +16,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { useAuth } from "@/lib/authContext";
 import {
   loginSchema,
   signupSchema,
@@ -28,16 +29,19 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 interface AuthFormProps {
-  onLogin?: (email: string, password: string) => void;
-  onSignup?: (email: string, password: string, confirmPassword: string) => void;
+  onSuccess?: () => void;
 }
 
-export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
+export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(params.mode !== "signup");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Use React Hook Form with Zod resolver
   const {
@@ -45,29 +49,60 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    watch,
   } = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(isLogin ? loginSchema : signupSchema),
-    mode: "onChange", // Real-time validation
+    mode: "onChange", // Real-time validation for password fields
   });
+
+  const watchedPassword = watch("password");
 
   // Update form when mode changes
   useEffect(() => {
     const newMode = params.mode === "signup" ? false : true;
     setIsLogin(newMode);
+    setHasAttemptedSubmit(false);
+    setError(null);
     reset(); // Reset form when switching modes
   }, [params.mode, reset]);
 
-  const onSubmit = (data: LoginFormData | SignupFormData) => {
-    if (isLogin && onLogin) {
-      onLogin(data.email, data.password);
-    } else if (!isLogin && onSignup && "confirmPassword" in data) {
-      onSignup(data.email, data.password, data.confirmPassword);
+  const onSubmit = async (data: LoginFormData | SignupFormData) => {
+    setHasAttemptedSubmit(true);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      if (isLogin) {
+        await login({
+          email: data.email,
+          password: data.password,
+        });
+      } else {
+        await register({
+          email: data.email,
+          password: data.password,
+          username: (data as SignupFormData).username || undefined,
+        });
+        // After successful registration, you might want to auto-login
+        // or show a success message
+      }
+
+      // Call success callback or navigate
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      setError(error.message || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const toggleMode = () => {
     const newMode = !isLogin;
     setIsLogin(newMode);
+    setHasAttemptedSubmit(false);
+    setError(null);
     reset();
 
     // Navigate to the appropriate route
@@ -78,6 +113,11 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
   // Type-safe error access
   const getFieldError = (fieldName: string) => {
     return (errors as any)[fieldName]?.message;
+  };
+
+  // Show email error only when submit button has been pressed
+  const shouldShowEmailError = () => {
+    return hasAttemptedSubmit && !!getFieldError("email");
   };
 
   return (
@@ -94,6 +134,13 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
                 : "Регистрирайте се, за да започнете"}
             </Text>
           </Center>
+
+          {/* Global error message */}
+          {error && (
+            <Box className="bg-error-50 border border-error-200 rounded-md p-3">
+              <Text className="text-error-600 text-sm">{error}</Text>
+            </Box>
+          )}
 
           <VStack space="md" className="mt-6">
             {/* Email Field */}
@@ -123,6 +170,37 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
                 </FormControlErrorText>
               </FormControlError>
             </FormControl>
+
+            {/* Username Field (only for signup) */}
+            {!isLogin && (
+              <FormControl isInvalid={!!getFieldError("username")}>
+                <FormControlLabel>
+                  <FormControlLabelText>
+                    Потребителско име (по желание)
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="username"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input variant="outline" size="md">
+                      <InputField
+                        placeholder="Въведете потребителско име"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        autoCapitalize="none"
+                      />
+                    </Input>
+                  )}
+                />
+                <FormControlError>
+                  <FormControlErrorText>
+                    {getFieldError("username")}
+                  </FormControlErrorText>
+                </FormControlError>
+              </FormControl>
+            )}
 
             {/* Password Field */}
             <FormControl isInvalid={!!getFieldError("password")}>
@@ -210,9 +288,17 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin, onSignup }) => {
               variant="solid"
               size="md"
               className="mt-4"
-              disabled={!isValid}
+              disabled={!isValid || isSubmitting}
             >
-              <ButtonText>{isLogin ? "Влизане" : "Регистрация"}</ButtonText>
+              <ButtonText>
+                {isSubmitting
+                  ? isLogin
+                    ? "Влизане..."
+                    : "Регистрация..."
+                  : isLogin
+                  ? "Влизане"
+                  : "Регистрация"}
+              </ButtonText>
             </Button>
           </VStack>
 
