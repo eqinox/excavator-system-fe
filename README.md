@@ -1,50 +1,66 @@
-# Welcome to your Expo app 👋
+# iOS Network Configuration with ngrok
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Due to iOS network restrictions, you need to set up ngrok for iOS testing:
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Step 1: Install ngrok
 
 ```bash
-npm run reset-project
+# Download from https://ngrok.com/download
+# Or install via npm
+npm install -g ngrok
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Step 2: Get your auth token
 
-## Learn more
+1. Go to https://ngrok.com/ and sign up
+2. Visit https://dashboard.ngrok.com/get-started/your-authtoken
+3. Copy your auth token
 
-To learn more about developing your project with Expo, look at the following resources:
+## Step 3: Configure ngrok
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+ngrok config add-authtoken YOUR_TOKEN_HERE
+```
 
-## Join the community
+## Step 4: Start the tunnel
 
-Join our community of developers creating universal apps.
+```bash
+ngrok http 5000
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+You'll see output like:
+
+```
+Forwarding    https://abc123.ngrok-free.app -> http://localhost:5000
+```
+
+## Step 5: Update the app
+
+Update `lib/api.ts` with your ngrok URL:
+
+```typescript
+} else if (Platform.OS === "ios") {
+  return "https://YOUR_NGROK_URL.ngrok-free.app";
+}
+```
+
+## Step 6: Test
+
+- **Web**: Uses localhost (no tunnel needed)
+- **Android**: Uses local IP (no tunnel needed)
+- **iOS**: Uses ngrok HTTPS URL
+
+## Troubleshooting
+
+### "Network request failed" on iOS
+
+1. Ensure ngrok is running: `ngrok http 5000`
+2. Test in Safari: `https://your-ngrok-url.ngrok-free.app`
+3. Update the app with the correct ngrok URL
+4. Restart the Expo app
+
+### Server not accessible
+
+1. Make sure your server listens on `0.0.0.0:5000`
+2. Check firewall settings
+3. Ensure phone and computer are on same WiFi (for Android)

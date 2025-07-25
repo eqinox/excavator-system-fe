@@ -1,3 +1,5 @@
+import * as SecureStore from "expo-secure-store";
+import { Platform } from "react-native";
 import {
   apiClient,
   type LoginDto,
@@ -11,6 +13,31 @@ import {
 const ACCESS_TOKEN_KEY = "access_token";
 const USER_DATA_KEY = "user_data";
 
+// Platform-specific storage functions
+const getStorageItem = async (key: string): Promise<string | null> => {
+  if (Platform.OS === "web") {
+    return localStorage.getItem(key);
+  } else {
+    return SecureStore.getItemAsync(key);
+  }
+};
+
+const setStorageItem = async (key: string, value: string): Promise<void> => {
+  if (Platform.OS === "web") {
+    localStorage.setItem(key, value);
+  } else {
+    await SecureStore.setItemAsync(key, value);
+  }
+};
+
+const removeStorageItem = async (key: string): Promise<void> => {
+  if (Platform.OS === "web") {
+    localStorage.removeItem(key);
+  } else {
+    await SecureStore.deleteItemAsync(key);
+  }
+};
+
 // Authentication service class
 class AuthService {
   private accessToken: string | null = null;
@@ -19,16 +46,13 @@ class AuthService {
   // Initialize auth state from secure storage
   async initialize(): Promise<void> {
     try {
-      // Temporarily disable SecureStore to test
-      // const [token, userData] = await Promise.all([
-      //   SecureStore.getItemAsync(ACCESS_TOKEN_KEY),
-      //   SecureStore.getItemAsync(USER_DATA_KEY),
-      // ]);
+      const [token, userData] = await Promise.all([
+        getStorageItem(ACCESS_TOKEN_KEY),
+        getStorageItem(USER_DATA_KEY),
+      ]);
 
-      // this.accessToken = token;
-      // this.user = userData ? JSON.parse(userData) : null;
-
-      console.log("Auth initialized (SecureStore disabled)");
+      this.accessToken = token;
+      this.user = userData ? JSON.parse(userData) : null;
     } catch (error) {
       console.error("Failed to initialize auth:", error);
     }
@@ -118,7 +142,7 @@ class AuthService {
         {}
       );
       this.accessToken = response.access_token;
-      // await SecureStore.setItemAsync(ACCESS_TOKEN_KEY, this.accessToken);
+      await setStorageItem(ACCESS_TOKEN_KEY, this.accessToken);
 
       return this.accessToken;
     } catch (error) {
@@ -187,13 +211,12 @@ class AuthService {
     this.accessToken = token;
     this.user = user;
 
-    // Temporarily disable SecureStore to test
-    // await Promise.all([
-    //   SecureStore.setItemAsync(ACCESS_TOKEN_KEY, token),
-    //   SecureStore.setItemAsync(USER_DATA_KEY, JSON.stringify(user)),
-    // ]);
+    await Promise.all([
+      setStorageItem(ACCESS_TOKEN_KEY, token),
+      setStorageItem(USER_DATA_KEY, JSON.stringify(user)),
+    ]);
 
-    console.log("Auth data stored in memory (SecureStore disabled)");
+    console.log("Auth data stored securely");
   }
 
   // Clear authentication data
@@ -201,13 +224,12 @@ class AuthService {
     this.accessToken = null;
     this.user = null;
 
-    // Temporarily disable SecureStore to test
-    // await Promise.all([
-    //   SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY),
-    //   SecureStore.deleteItemAsync(USER_DATA_KEY),
-    // ]);
+    await Promise.all([
+      removeStorageItem(ACCESS_TOKEN_KEY),
+      removeStorageItem(USER_DATA_KEY),
+    ]);
 
-    console.log("Auth data cleared from memory (SecureStore disabled)");
+    console.log("Auth data cleared securely");
   }
 }
 
