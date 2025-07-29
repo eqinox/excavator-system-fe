@@ -1,19 +1,4 @@
-import { Platform } from "react-native";
-
-// Base API configuration
-const getApiBaseUrl = () => {
-  if (Platform.OS === "web") {
-    return "http://localhost:5000";
-  } else if (Platform.OS === "ios") {
-    // For iOS, use ngrok tunnel for HTTPS access
-    return "https://276f1a4d70d1.ngrok-free.app";
-  } else {
-    // For Android, use your computer's IP address
-    return "http://151.251.82.193:5000";
-  }
-};
-
-const API_BASE_URL = getApiBaseUrl();
+import { BASE_URL } from "@/constants";
 
 // Types for your DTOs
 export interface RegisterDto {
@@ -47,11 +32,18 @@ export interface LoginResponseDto {
   user: UserResponseDto;
 }
 
+export interface CategoryResponse {
+  name: string;
+  equipment: string[];
+  created_by: string;
+  image: string;
+}
+
 // HTTP client class
 class ApiClient {
   private baseURL: string;
 
-  constructor(baseURL: string = API_BASE_URL) {
+  constructor(baseURL: string = BASE_URL) {
     this.baseURL = baseURL;
   }
 
@@ -189,9 +181,9 @@ export const apiClient = new ApiClient();
 
 // Test function to verify connection
 export const testConnection = async () => {
-  console.log("🔍 Testing connection to:", API_BASE_URL);
+  console.log("🔍 Testing connection to:", BASE_URL);
   try {
-    const response = await fetch(`${API_BASE_URL}/health`);
+    const response = await fetch(`${BASE_URL}/health`);
     console.log("✅ Connection successful:", response.status);
     return true;
   } catch (error) {

@@ -160,6 +160,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
                       onBlur={onBlur}
                       keyboardType="email-address"
                       autoCapitalize="none"
+                      returnKeyType="next"
                     />
                   </Input>
                 )}
@@ -190,6 +191,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
                         onChangeText={onChange}
                         onBlur={onBlur}
                         autoCapitalize="none"
+                        returnKeyType="next"
                       />
                     </Input>
                   )}
@@ -219,6 +221,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
                       onBlur={onBlur}
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
+                      returnKeyType={isLogin ? "done" : "next"}
+                      onSubmitEditing={
+                        isLogin ? () => handleSubmit(onSubmit)() : undefined
+                      }
                     />
                     <Pressable
                       onPress={() => setShowPassword(!showPassword)}
@@ -258,6 +264,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
                         onBlur={onBlur}
                         secureTextEntry={!showConfirmPassword}
                         autoCapitalize="none"
+                        returnKeyType="done"
+                        onSubmitEditing={() => handleSubmit(onSubmit)()}
                       />
                       <Pressable
                         onPress={() =>

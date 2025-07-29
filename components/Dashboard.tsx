@@ -10,7 +10,7 @@ import { useAuth } from "@/lib/authContext";
 import React from "react";
 
 export default function Dashboard() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -20,20 +20,9 @@ export default function Dashboard() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <Center className="flex-1">
-        <Text>Зареждане...</Text>
-      </Center>
-    );
-  }
-
+  // This component is only rendered when user is authenticated (protected route)
   if (!user) {
-    return (
-      <Center className="flex-1">
-        <Text>Не сте влезли в системата</Text>
-      </Center>
-    );
+    return null;
   }
 
   return (
