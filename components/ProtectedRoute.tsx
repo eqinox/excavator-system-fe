@@ -1,18 +1,21 @@
-import { AuthForm } from "@/components/AuthForm";
 import { Center } from "@/components/ui/center";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/authContext";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 
-export default function AuthScreen() {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // If user is authenticated, redirect to categories
-    if (!isLoading && user) {
-      router.replace("/categories");
+    if (!isLoading && !user) {
+      // Redirect to auth form if not authenticated
+      router.replace("/");
     }
   }, [user, isLoading, router]);
 
@@ -24,15 +27,13 @@ export default function AuthScreen() {
     );
   }
 
-  // If user is authenticated, show loading (will redirect)
-  if (user) {
+  if (!user) {
     return (
       <Center className="flex-1">
-        <Text>Пренасочване...</Text>
+        <Text>Пренасочване към вход...</Text>
       </Center>
     );
   }
 
-  // Show auth form for unauthenticated users
-  return <AuthForm />;
+  return <>{children}</>;
 }

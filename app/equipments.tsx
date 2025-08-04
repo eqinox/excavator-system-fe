@@ -1,3 +1,4 @@
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { Box } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
@@ -52,47 +53,49 @@ export default function Equipments() {
   };
 
   return (
-    <VStack className="flex-1 px-4 justify-start">
-      <VStack space="xl" className="w-full max-w-4xl">
-        <VStack space="md" className="mt-4 mb-4">
-          <HStack className="justify-end">
-            <Button variant="outline" onPress={() => handleCreateEquipment()}>
-              <Text>Публикувай оборудване</Text>
-            </Button>
-          </HStack>
-        </VStack>
-
+    <ProtectedRoute>
+      <VStack className="flex-1 px-4 justify-start">
         <VStack space="xl" className="w-full max-w-4xl">
-          <VStack space="lg" className="w-full">
-            <HStack space="md" className="flex-wrap justify-center">
-              {equipments.map((equipment, index) => (
-                <VStack key={index} space="sm" className="items-center">
-                  <Box className="w-48 h-48 bg-primary rounded-lg flex items-center justify-center shadow-md overflow-hidden">
-                    {equipment.images && (
-                      <Image
-                        source={{
-                          uri: `${BASE_URL}/images/${equipment.images[0].small}`,
-                        }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                      />
-                    )}
-                  </Box>
-                  <Text className="text-center font-medium text-sm max-w-24">
-                    {equipment.name}
-                  </Text>
-                </VStack>
-              ))}
-
-              {equipments.length === 0 && (
-                <Text className="text-center font-medium text-lg">
-                  Няма налично оборудване
-                </Text>
-              )}
+          <VStack space="md" className="mt-4 mb-4">
+            <HStack className="justify-end">
+              <Button variant="outline" onPress={() => handleCreateEquipment()}>
+                <Text>Публикувай оборудване</Text>
+              </Button>
             </HStack>
+          </VStack>
+
+          <VStack space="xl" className="w-full max-w-4xl">
+            <VStack space="lg" className="w-full">
+              <HStack space="md" className="flex-wrap justify-center">
+                {equipments.map((equipment, index) => (
+                  <VStack key={index} space="sm" className="items-center">
+                    <Box className="w-48 h-48 bg-primary rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+                      {equipment.images && (
+                        <Image
+                          source={{
+                            uri: `${BASE_URL}/images/${equipment.images[0].small}`,
+                          }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                        />
+                      )}
+                    </Box>
+                    <Text className="text-center font-medium text-sm max-w-24">
+                      {equipment.name}
+                    </Text>
+                  </VStack>
+                ))}
+
+                {equipments.length === 0 && (
+                  <Text className="text-center font-medium text-lg">
+                    Няма налично оборудване
+                  </Text>
+                )}
+              </HStack>
+            </VStack>
           </VStack>
         </VStack>
       </VStack>
-    </VStack>
+    </ProtectedRoute>
   );
 }

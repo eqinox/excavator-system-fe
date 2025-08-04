@@ -26,13 +26,22 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <GluestackUIProvider mode="light">
+      <GluestackUIProvider mode="system">
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <StatusBar style="auto" />
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="categories"
+              options={{ headerShown: true, headerTitle: "" }}
+            />
+            <Stack.Screen
+              name="equipments"
+              options={{ headerShown: true, headerTitle: "" }}
+            />
+            <Stack.Screen name="equipment" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </ThemeProvider>
