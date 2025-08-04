@@ -33,10 +33,28 @@ export interface LoginResponseDto {
 }
 
 export interface CategoryResponse {
+  id: string;
   name: string;
   equipment: string[];
   created_by: string;
-  image: string;
+  image: {
+    small: string;
+    original: string;
+  };
+}
+
+export interface EquipmentResponse {
+  id: string;
+  name: string;
+  description: string;
+  category_id: string;
+  images: Array<{ original: string; small: string }>;
+  price_per_day: number;
+  available: boolean;
+  location_id: string;
+  owner: string;
+  created_at: string; // ISO string
+  updated_at: string; // ISO string
 }
 
 // HTTP client class
@@ -148,15 +166,33 @@ class ApiClient {
     token: string
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log("🔑 Token being used:", token);
+    console.log("🔑 Token length:", token?.length);
+    console.log("🔑 Token is empty:", !token);
+
+    // Check if body is FormData
+    const isFormData = options.body instanceof FormData;
 
     const config: RequestInit = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...options.headers,
-      },
       ...options,
+      headers: {
+        // Don't set Content-Type for FormData - let the browser set it automatically
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {}),
+      },
     };
+
+    console.log("📤 Request headers:", config.headers);
+    console.log("📤 Request body type:", typeof config.body);
+    console.log("📤 Is FormData:", config.body instanceof FormData);
+
+    // Debug FormData contents
+    if (config.body instanceof FormData) {
+      console.log(
+        "📤 FormData detected - will be sent with proper multipart boundary"
+      );
+    }
 
     try {
       const response = await fetch(url, config);

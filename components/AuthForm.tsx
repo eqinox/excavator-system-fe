@@ -22,7 +22,7 @@ import {
   signupSchema,
   type LoginFormData,
   type SignupFormData,
-} from "@/lib/validation";
+} from "@/validation/authentication";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";

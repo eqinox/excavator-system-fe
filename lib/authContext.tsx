@@ -31,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<UserResponseDto | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +41,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializeAuth = async () => {
     try {
       await authService.initialize();
-      setUser(authService.getUser());
+      const user = authService.getUser();
+      const token = authService.getAccessToken();
+      setUser(user);
+      setAccessToken(token);
+      console.log(
+        "🔐 Auth initialized - user:",
+        user?.id,
+        "token:",
+        token?.substring(0, 10) + "..."
+      );
     } catch (error) {
       console.error("Auth initialization error:", error);
     } finally {
@@ -52,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const response = await authService.login(credentials);
       setUser(response.user);
+      setAccessToken(authService.getAccessToken());
     } catch (error) {
       throw error;
     }
@@ -73,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       await authService.logout();
       setUser(null);
+      setAccessToken(null);
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -82,11 +94,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     user,
     isAuthenticated: !!user,
     isLoading,
-    accessToken: authService.getAccessToken(),
+    accessToken,
     login,
     register,
     logout,
   };
+
+  // Debug logging
+  console.log("🔐 AuthContext - user:", user?.id);
+  console.log(
+    "🔐 AuthContext - accessToken:",
+    accessToken?.substring(0, 10) + "..."
+  );
+  console.log("🔐 AuthContext - isAuthenticated:", !!user);
+
+  // Add effect to sync token state with authService
+  useEffect(() => {
+    const syncToken = () => {
+      const currentToken = authService.getAccessToken();
+      if (currentToken !== accessToken) {
+        console.log(
+          "🔄 Syncing token state:",
+          currentToken?.substring(0, 10) + "..."
+        );
+        setAccessToken(currentToken);
+      }
+    };
+
+    // Sync immediately
+    syncToken();
+
+    // Set up interval to check for token changes
+    const interval = setInterval(syncToken, 1000);
+
+    return () => clearInterval(interval);
+  }, [accessToken]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
