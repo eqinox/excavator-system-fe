@@ -1,18 +1,17 @@
 import { Tabs } from "expo-router";
+import { useColorScheme } from "nativewind";
 import React from "react";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useColorScheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: colorScheme === "dark" ? "#fff" : "#0a7ea4",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,

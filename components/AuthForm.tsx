@@ -49,13 +49,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    watch,
   } = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(isLogin ? loginSchema : signupSchema),
     mode: "onChange", // Real-time validation for password fields
   });
-
-  const watchedPassword = watch("password");
 
   // Update form when mode changes
   useEffect(() => {
