@@ -109,11 +109,11 @@ export const config = {
     "--color-typography-300": "75 85 99",
     "--color-typography-400": "107 114 128",
     "--color-typography-500": "156 163 175",
-    "--color-typography-600": "209 213 219",
-    "--color-typography-700": "229 231 235",
-    "--color-typography-800": "243 244 246",
-    "--color-typography-900": "249 250 251",
-    "--color-typography-950": "255 255 255",
+    "--color-typography-600": "75 85 99",
+    "--color-typography-700": "55 65 81",
+    "--color-typography-800": "31 41 55",
+    "--color-typography-900": "17 24 39",
+    "--color-typography-950": "3 7 18",
 
     /* Outline */
     "--color-outline-0": "255 255 255",
@@ -262,11 +262,11 @@ export const config = {
     "--color-typography-300": "209 213 219",
     "--color-typography-400": "156 163 175",
     "--color-typography-500": "107 114 128",
-    "--color-typography-600": "75 85 99",
-    "--color-typography-700": "55 65 81",
-    "--color-typography-800": "31 41 55",
-    "--color-typography-900": "17 24 39",
-    "--color-typography-950": "3 7 18",
+    "--color-typography-600": "156 163 175",
+    "--color-typography-700": "209 213 219",
+    "--color-typography-800": "229 231 235",
+    "--color-typography-900": "243 244 246",
+    "--color-typography-950": "249 250 251",
 
     /* Outline */
     "--color-outline-0": "255 255 255",
