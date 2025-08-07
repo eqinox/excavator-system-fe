@@ -1,4 +1,4 @@
-import { AuthForm } from "@/components/AuthForm";
+import AuthenticationForm from "@/components/AuthenticationForm";
 import { Center } from "@/components/ui/center";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/lib/authContext";
@@ -34,5 +34,5 @@ export default function AuthScreen() {
   }
 
   // Show auth form for unauthenticated users
-  return <AuthForm />;
+  return <AuthenticationForm />;
 }

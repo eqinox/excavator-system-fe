@@ -1,15 +1,15 @@
 'use client';
 import { Text, View } from 'react-native';
 import React from 'react';
-import { createFormControl } from '@gluestack-ui/form-control';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
+import { createFormControl } from '@gluestack-ui-nightly/core/form-control/creator';
+import { tva } from '@gluestack-ui-nightly/utils/nativewind-utils';
 import {
   withStyleContext,
   useStyleContext,
-} from '@gluestack-ui/nativewind-utils/withStyleContext';
+} from '@gluestack-ui-nightly/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
-import { PrimitiveIcon, UIIcon } from '@gluestack-ui/icon';
+import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import { PrimitiveIcon, UIIcon } from '@gluestack-ui-nightly/core/icon/creator';
 
 const SCOPE = 'FORM_CONTROL';
 
@@ -305,7 +305,7 @@ const FormControlErrorText = React.forwardRef<
     <UIFormControl.Error.Text
       className={formControlErrorTextStyle({
         parentVariants: { size: parentSize },
-        size,
+        size: size as any,
         class: className,
       })}
       ref={ref}
@@ -353,7 +353,7 @@ const FormControlErrorIcon = React.forwardRef<
     <UIFormControl.Error.Icon
       className={formControlErrorIconStyle({
         parentVariants: { size: parentSize },
-        size,
+        size: size as any,
         class: className,
       })}
       {...props}
@@ -392,7 +392,7 @@ const FormControlLabelText = React.forwardRef<
     <UIFormControl.Label.Text
       className={formControlLabelTextStyle({
         parentVariants: { size: parentSize },
-        size,
+        size: size as any,
         class: className,
       })}
       ref={ref}
@@ -436,7 +436,7 @@ const FormControlHelperText = React.forwardRef<
     <UIFormControl.Helper.Text
       className={formControlHelperTextStyle({
         parentVariants: { size: parentSize },
-        size,
+        size: size as any,
         class: className,
       })}
       ref={ref}

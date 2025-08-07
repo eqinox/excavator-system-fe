@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/constants";
+import { BASE_URL } from '@/constants';
 
 // Types for your DTOs
 export interface RegisterDto {
@@ -73,34 +73,20 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
 
     const config: RequestInit = {
-      method: options.method || "GET",
+      method: options.method || 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...(options.headers || {}),
       },
       body: options.body,
     };
 
-    console.log("🌐 API Request Details:", {
-      url,
-      method: config.method || "GET",
-      headers: config.headers,
-      body: config.body ? JSON.parse(config.body as string) : undefined,
-      bodyString: config.body,
-    });
-
     try {
       const response = await fetch(url, config);
 
-      console.log("📡 API Response:", {
-        status: response.status,
-        statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("❌ API Error Details:", {
+        console.error('❌ API Error Details:', {
           status: response.status,
           statusText: response.statusText,
           errorData,
@@ -112,7 +98,7 @@ class ApiClient {
       }
 
       const data = await response.json();
-      console.log("✅ API Success:", data);
+      console.log('✅ API Success:', data);
       return data;
     } catch (error) {
       console.error(`❌ API request failed: ${endpoint}`, error);
@@ -122,7 +108,7 @@ class ApiClient {
 
   // GET request
   async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: "GET", headers });
+    return this.request<T>(endpoint, { method: 'GET', headers });
   }
 
   // POST request
@@ -132,7 +118,7 @@ class ApiClient {
     headers?: Record<string, string>
   ): Promise<T> {
     return this.request<T>(endpoint, {
-      method: "POST",
+      method: 'POST',
       headers,
       body: JSON.stringify(data),
     });
@@ -145,7 +131,7 @@ class ApiClient {
     headers?: Record<string, string>
   ): Promise<T> {
     return this.request<T>(endpoint, {
-      method: "PUT",
+      method: 'PUT',
       headers,
       body: JSON.stringify(data),
     });
@@ -156,7 +142,7 @@ class ApiClient {
     endpoint: string,
     headers?: Record<string, string>
   ): Promise<T> {
-    return this.request<T>(endpoint, { method: "DELETE", headers });
+    return this.request<T>(endpoint, { method: 'DELETE', headers });
   }
 
   // Authenticated request with Bearer token
@@ -166,9 +152,6 @@ class ApiClient {
     token: string
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    console.log("🔑 Token being used:", token);
-    console.log("🔑 Token length:", token?.length);
-    console.log("🔑 Token is empty:", !token);
 
     // Check if body is FormData
     const isFormData = options.body instanceof FormData;
@@ -177,22 +160,11 @@ class ApiClient {
       ...options,
       headers: {
         // Don't set Content-Type for FormData - let the browser set it automatically
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         Authorization: `Bearer ${token}`,
         ...(options.headers || {}),
       },
     };
-
-    console.log("📤 Request headers:", config.headers);
-    console.log("📤 Request body type:", typeof config.body);
-    console.log("📤 Is FormData:", config.body instanceof FormData);
-
-    // Debug FormData contents
-    if (config.body instanceof FormData) {
-      console.log(
-        "📤 FormData detected - will be sent with proper multipart boundary"
-      );
-    }
 
     try {
       const response = await fetch(url, config);
@@ -214,16 +186,3 @@ class ApiClient {
 
 // Create singleton instance
 export const apiClient = new ApiClient();
-
-// Test function to verify connection
-export const testConnection = async () => {
-  console.log("🔍 Testing connection to:", BASE_URL);
-  try {
-    const response = await fetch(`${BASE_URL}/health`);
-    console.log("✅ Connection successful:", response.status);
-    return true;
-  } catch (error) {
-    console.error("❌ Connection failed:", error);
-    return false;
-  }
-};
