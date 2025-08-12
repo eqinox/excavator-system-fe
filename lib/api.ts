@@ -171,14 +171,28 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('❌ API Error Response:', errorData);
         throw new Error(
           errorData.message || `HTTP ${response.status}: ${response.statusText}`
         );
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log('✅ API Success Response:', data);
+      return data;
     } catch (error) {
-      console.error(`Authenticated API request failed: ${endpoint}`, error);
+      console.error(`❌ Authenticated API request failed: ${endpoint}`, error);
+
+      // Provide more specific error messages for network issues
+      if (
+        error instanceof TypeError &&
+        error.message.includes('Network request failed')
+      ) {
+        throw new Error(
+          `Network error: Unable to connect to ${url}. Please check your internet connection and ensure the server is running.`
+        );
+      }
+
       throw error;
     }
   }

@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   authService,
   type LoginDto,
   type RegisterDto,
   type RegisterResponseDto,
   type UserResponseDto,
-} from "./auth";
+} from './auth';
 
 interface AuthContextType {
   user: UserResponseDto | null;
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
@@ -45,14 +45,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const token = authService.getAccessToken();
       setUser(user);
       setAccessToken(token);
-      console.log(
-        "🔐 Auth initialized - user:",
-        user?.id,
-        "token:",
-        token?.substring(0, 10) + "..."
-      );
     } catch (error) {
-      console.error("Auth initialization error:", error);
+      console.error('Auth initialization error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
       setAccessToken(null);
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     }
   };
 
@@ -100,23 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     logout,
   };
 
-  // Debug logging
-  console.log("🔐 AuthContext - user:", user?.id);
-  console.log(
-    "🔐 AuthContext - accessToken:",
-    accessToken?.substring(0, 10) + "..."
-  );
-  console.log("🔐 AuthContext - isAuthenticated:", !!user);
-
   // Add effect to sync token state with authService
   useEffect(() => {
     const syncToken = () => {
       const currentToken = authService.getAccessToken();
       if (currentToken !== accessToken) {
-        console.log(
-          "🔄 Syncing token state:",
-          currentToken?.substring(0, 10) + "..."
-        );
         setAccessToken(currentToken);
       }
     };
