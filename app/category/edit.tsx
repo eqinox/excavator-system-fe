@@ -40,6 +40,7 @@ export default function EditCategory() {
   // Mock initial data - in real app, you'd fetch this from API
   const initialData = {
     name: categoryName || '',
+    image: null, // Add image field to satisfy the type requirement
   };
 
   return (

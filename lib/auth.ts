@@ -1,5 +1,5 @@
-import * as SecureStore from "expo-secure-store";
-import { Platform } from "react-native";
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import {
   apiClient,
   type LoginDto,
@@ -7,15 +7,16 @@ import {
   type RegisterDto,
   type RegisterResponseDto,
   type UserResponseDto,
-} from "./api";
+} from './api';
 
 // Storage keys
-const ACCESS_TOKEN_KEY = "access_token";
-const USER_DATA_KEY = "user_data";
+const ACCESS_TOKEN_KEY = 'access_token';
+const USER_DATA_KEY = 'user_data';
+const TOKEN_EXPIRY_KEY = 'token_expiry';
 
 // Platform-specific storage functions
 const getStorageItem = async (key: string): Promise<string | null> => {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     return localStorage.getItem(key);
   } else {
     return SecureStore.getItemAsync(key);
@@ -23,7 +24,7 @@ const getStorageItem = async (key: string): Promise<string | null> => {
 };
 
 const setStorageItem = async (key: string, value: string): Promise<void> => {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     localStorage.setItem(key, value);
   } else {
     await SecureStore.setItemAsync(key, value);
@@ -31,10 +32,30 @@ const setStorageItem = async (key: string, value: string): Promise<void> => {
 };
 
 const removeStorageItem = async (key: string): Promise<void> => {
-  if (Platform.OS === "web") {
+  if (Platform.OS === 'web') {
     localStorage.removeItem(key);
   } else {
     await SecureStore.deleteItemAsync(key);
+  }
+};
+
+// JWT token utilities
+const decodeJWT = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
   }
 };
 
@@ -46,15 +67,23 @@ class AuthService {
   // Initialize auth state from secure storage
   async initialize(): Promise<void> {
     try {
-      const [token, userData] = await Promise.all([
+      const [token, userData, expiry] = await Promise.all([
         getStorageItem(ACCESS_TOKEN_KEY),
         getStorageItem(USER_DATA_KEY),
+        getStorageItem(TOKEN_EXPIRY_KEY),
       ]);
 
       this.accessToken = token;
       this.user = userData ? JSON.parse(userData) : null;
+      this.tokenExpiry = expiry ? parseInt(expiry) : null;
+
+      // Check if token is expired
+      if (this.isTokenExpired()) {
+        console.log('Token is expired, clearing auth data');
+        await this.clearAuthData();
+      }
     } catch (error) {
-      console.error("Failed to initialize auth:", error);
+      console.error('Failed to initialize auth:', error);
     }
   }
 
@@ -77,7 +106,7 @@ class AuthService {
   async register(credentials: RegisterDto): Promise<RegisterResponseDto> {
     try {
       const response = await apiClient.post<RegisterResponseDto>(
-        "/auth/signup",
+        '/auth/signup',
         credentials
       );
 
@@ -85,7 +114,7 @@ class AuthService {
       // or just return the registration response
       return response;
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error('Registration error:', error);
       throw error;
     }
   }
@@ -94,7 +123,7 @@ class AuthService {
   async login(credentials: LoginDto): Promise<LoginResponseDto> {
     try {
       const response = await apiClient.post<LoginResponseDto>(
-        "/auth/signin",
+        '/auth/signin',
         credentials
       );
 
@@ -103,7 +132,7 @@ class AuthService {
 
       return response;
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       throw error;
     }
   }
@@ -115,12 +144,12 @@ class AuthService {
       if (this.accessToken) {
         try {
           await apiClient.authenticatedRequest(
-            "/auth/logout",
-            { method: "POST" },
+            '/auth/logout',
+            { method: 'POST' },
             this.accessToken
           );
         } catch (error) {
-          console.error("Logout API error:", error);
+          console.error('Logout API error:', error);
           // Continue with local logout even if API call fails
         }
       }
@@ -128,7 +157,7 @@ class AuthService {
       // Clear local authentication data
       await this.clearAuthData();
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
       // Ensure auth data is cleared even if there's an error
       await this.clearAuthData();
     }
@@ -138,7 +167,7 @@ class AuthService {
   async refreshToken(): Promise<string | null> {
     try {
       const response = await apiClient.post<LoginResponseDto>(
-        "/auth/refresh",
+        '/auth/refresh',
         {}
       );
       this.accessToken = response.access_token;
@@ -146,7 +175,7 @@ class AuthService {
 
       return this.accessToken;
     } catch (error) {
-      console.error("Token refresh error:", error);
+      console.error('Token refresh error:', error);
       await this.clearAuthData();
       return null;
     }
@@ -158,7 +187,7 @@ class AuthService {
     options: RequestInit = {}
   ): Promise<T> {
     if (!this.accessToken) {
-      throw new Error("No access token available");
+      throw new Error('No access token available');
     }
 
     try {
@@ -169,7 +198,7 @@ class AuthService {
       );
     } catch (error: any) {
       // Handle 401 Unauthorized
-      if (error.message?.includes("401")) {
+      if (error.message?.includes('401')) {
         const newToken = await this.refreshToken();
         if (newToken) {
           // Retry the request with new token
@@ -181,7 +210,7 @@ class AuthService {
         } else {
           // Refresh failed, logout user
           await this.logout();
-          throw new Error("Authentication expired");
+          throw new Error('Authentication expired');
         }
       }
       throw error;
@@ -190,15 +219,15 @@ class AuthService {
 
   // Get user profile (example authenticated request)
   async getUserProfile(): Promise<UserResponseDto> {
-    return this.authenticatedRequest<UserResponseDto>("/auth/profile");
+    return this.authenticatedRequest<UserResponseDto>('/auth/profile');
   }
 
   // Update user profile (example authenticated request)
   async updateUserProfile(
     data: Partial<UserResponseDto>
   ): Promise<UserResponseDto> {
-    return this.authenticatedRequest<UserResponseDto>("/auth/profile", {
-      method: "PUT",
+    return this.authenticatedRequest<UserResponseDto>('/auth/profile', {
+      method: 'PUT',
       body: JSON.stringify(data),
     });
   }
@@ -208,15 +237,26 @@ class AuthService {
     token: string,
     user: UserResponseDto
   ): Promise<void> {
-    this.accessToken = token;
-    this.user = user;
+    try {
+      // Decode JWT to get expiry
+      const decoded = decodeJWT(token);
+      const expiry = decoded?.exp ? decoded.exp * 1000 : null; // Convert to milliseconds
 
-    await Promise.all([
-      setStorageItem(ACCESS_TOKEN_KEY, token),
-      setStorageItem(USER_DATA_KEY, JSON.stringify(user)),
-    ]);
+      this.accessToken = token;
+      this.user = user;
+      this.tokenExpiry = expiry; // Запазваме кога изтича токенът
 
-    console.log("Auth data stored securely");
+      await Promise.all([
+        setStorageItem(ACCESS_TOKEN_KEY, token),
+        setStorageItem(USER_DATA_KEY, JSON.stringify(user)),
+        expiry
+          ? setStorageItem(TOKEN_EXPIRY_KEY, expiry.toString())
+          : Promise.resolve(),
+      ]);
+    } catch (error) {
+      console.error('Failed to store auth data:', error);
+      throw error;
+    }
   }
 
   // Clear authentication data
@@ -227,9 +267,48 @@ class AuthService {
     await Promise.all([
       removeStorageItem(ACCESS_TOKEN_KEY),
       removeStorageItem(USER_DATA_KEY),
+      removeStorageItem(TOKEN_EXPIRY_KEY),
     ]);
 
-    console.log("Auth data cleared securely");
+    console.log('Auth data cleared securely');
+  }
+
+  private tokenExpiry: number | null = null;
+
+  // Check if token is expired
+  isTokenExpired(): boolean {
+    if (!this.accessToken || !this.tokenExpiry) {
+      return true;
+    }
+
+    // Add 5 minute buffer before expiry
+    const bufferTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+    return Date.now() >= this.tokenExpiry - bufferTime;
+  }
+
+  // Validate token with server
+  async validateToken(): Promise<boolean> {
+    if (!this.accessToken) {
+      return false;
+    }
+
+    try {
+      // Call a protected endpoint to validate token
+      await apiClient.authenticatedRequest(
+        '/auth/validate',
+        { method: 'GET' },
+        this.accessToken
+      );
+      return true;
+    } catch (error: any) {
+      console.log('Token validation failed:', error.message);
+      return false;
+    }
+  }
+
+  // Check if user has admin role
+  isAdmin(): boolean {
+    return this.user?.role === 'admin';
   }
 }
 

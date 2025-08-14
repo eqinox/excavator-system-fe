@@ -12,9 +12,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   accessToken: string | null;
+  isAdmin: boolean;
   login: (credentials: LoginDto) => Promise<void>;
   register: (credentials: RegisterDto) => Promise<RegisterResponseDto>;
   logout: () => Promise<void>;
+  validateToken: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -89,9 +91,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isAuthenticated: !!user,
     isLoading,
     accessToken,
+    isAdmin: authService.isAdmin(),
     login,
     register,
     logout,
+    validateToken: authService.validateToken,
   };
 
   // Add effect to sync token state with authService
@@ -111,6 +115,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     return () => clearInterval(interval);
   }, [accessToken]);
+
+  // Add effect to check token validity periodically
+  useEffect(() => {
+    const checkTokenValidity = async () => {
+      if (user && accessToken) {
+        // Check every 5 minutes
+        const isValid = await authService.validateToken();
+        if (!isValid) {
+          console.log('Token is invalid, logging out');
+          await logout();
+        }
+      }
+    };
+
+    const interval = setInterval(checkTokenValidity, 5 * 60 * 1000); // 5 minutes
+    return () => clearInterval(interval);
+  }, [user, accessToken]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
