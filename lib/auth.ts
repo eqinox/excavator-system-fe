@@ -1,5 +1,3 @@
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
 import {
   apiClient,
   type LoginDto,
@@ -8,36 +6,12 @@ import {
   type RegisterResponseDto,
   type UserResponseDto,
 } from './api';
+import { getStorageItem, removeStorageItem, setStorageItem } from './storage';
 
 // Storage keys
 const ACCESS_TOKEN_KEY = 'access_token';
 const USER_DATA_KEY = 'user_data';
 const TOKEN_EXPIRY_KEY = 'token_expiry';
-
-// Platform-specific storage functions
-const getStorageItem = async (key: string): Promise<string | null> => {
-  if (Platform.OS === 'web') {
-    return localStorage.getItem(key);
-  } else {
-    return SecureStore.getItemAsync(key);
-  }
-};
-
-const setStorageItem = async (key: string, value: string): Promise<void> => {
-  if (Platform.OS === 'web') {
-    localStorage.setItem(key, value);
-  } else {
-    await SecureStore.setItemAsync(key, value);
-  }
-};
-
-const removeStorageItem = async (key: string): Promise<void> => {
-  if (Platform.OS === 'web') {
-    localStorage.removeItem(key);
-  } else {
-    await SecureStore.deleteItemAsync(key);
-  }
-};
 
 // JWT token utilities
 const decodeJWT = (token: string) => {
