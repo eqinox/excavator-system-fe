@@ -116,7 +116,6 @@ export default function CategoryForm({
             }
           );
 
-          console.log('📸 File object created:', file);
           formData.append('image', file);
         } else {
           // For non-base64 URIs (native React Native)
@@ -127,15 +126,6 @@ export default function CategoryForm({
           };
           formData.append('image', imageFile as any);
         }
-
-        // Debug: Log what we're sending
-        console.log('📤 Sending FormData with fields:');
-        console.log('- name:', data.name);
-        console.log('- image:', {
-          uri: data.image.uri,
-          type: data.image.type,
-          fileName: data.image.fileName,
-        });
 
         const response = await apiClient.authenticatedRequest(
           '/categories',

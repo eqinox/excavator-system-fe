@@ -1,11 +1,10 @@
+import { apiClient } from './api';
+import { LoginDto, RegisterDto, UserDto } from './dto/client/auth.dto';
 import {
-  apiClient,
-  type LoginDto,
-  type LoginResponseDto,
-  type RegisterDto,
-  type RegisterResponseDto,
-  type UserResponseDto,
-} from './api';
+  LoginResponseDto,
+  RegisterResponseDto,
+  UserResponseDto,
+} from './dto/server/auth.dto';
 import { getStorageItem, removeStorageItem, setStorageItem } from './storage';
 
 // Storage keys
@@ -36,7 +35,7 @@ const decodeJWT = (token: string) => {
 // Authentication service class
 class AuthService {
   private accessToken: string | null = null;
-  private user: UserResponseDto | null = null;
+  private user: UserDto | null = null;
 
   // Initialize auth state from secure storage
   async initialize(): Promise<void> {
@@ -67,7 +66,7 @@ class AuthService {
   }
 
   // Get current user
-  getUser(): UserResponseDto | null {
+  getUser(): UserDto | null {
     return this.user;
   }
 
@@ -102,7 +101,7 @@ class AuthService {
       );
 
       // Store authentication data
-      await this.storeAuthData(response.access_token, response.user);
+      await this.storeAuthData(response.data.access_token, response.data.user);
 
       return response;
     } catch (error) {
@@ -144,7 +143,7 @@ class AuthService {
         '/auth/refresh',
         {}
       );
-      this.accessToken = response.access_token;
+      this.accessToken = response.data.access_token;
       await setStorageItem(ACCESS_TOKEN_KEY, this.accessToken);
 
       return this.accessToken;
@@ -207,10 +206,7 @@ class AuthService {
   }
 
   // Store authentication data securely
-  private async storeAuthData(
-    token: string,
-    user: UserResponseDto
-  ): Promise<void> {
+  private async storeAuthData(token: string, user: UserDto): Promise<void> {
     try {
       // Decode JWT to get expiry
       const decoded = decodeJWT(token);
@@ -288,12 +284,3 @@ class AuthService {
 
 // Create singleton instance
 export const authService = new AuthService();
-
-// Export types for use in components
-export type {
-  LoginDto,
-  LoginResponseDto,
-  RegisterDto,
-  RegisterResponseDto,
-  UserResponseDto,
-};

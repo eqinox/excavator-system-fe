@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  authService,
-  type LoginDto,
-  type RegisterDto,
-  type RegisterResponseDto,
-  type UserResponseDto,
-} from './auth';
+import { authService } from './auth';
+import { LoginDto, RegisterDto, UserDto } from './dto/client/auth.dto';
+import { RegisterResponseDto } from './dto/server/auth.dto';
 
 interface AuthContextType {
-  user: UserResponseDto | null;
+  user: UserDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   accessToken: string | null;
@@ -32,7 +28,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<UserResponseDto | null>(null);
+  const [user, setUser] = useState<UserDto | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,10 +50,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const login = async (credentials: LoginDto) => {
+  const login = async (credentials: LoginDto): Promise<void> => {
     try {
       const response = await authService.login(credentials);
-      setUser(response.user);
+      setUser(response.data.user);
       setAccessToken(authService.getAccessToken());
     } catch (error) {
       throw error;

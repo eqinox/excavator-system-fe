@@ -1,24 +1,41 @@
+import {
+  AlertDialog,
+  AlertDialogBackdrop,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+} from '@/components/ui/alert-dialog';
 import { Center } from '@/components/ui/center';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
+import { EditIcon, TrashIcon } from '@/components/ui/icon';
 import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
-import { apiClient, CategoryResponse } from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { useAuth } from '@/lib/authContext';
+import {
+  CategoriesResponseDto,
+  CategoryResponseDataDto,
+} from '@/lib/dto/server/category.dto';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image } from 'react-native';
 import { Button } from './ui/button';
+import { Toast, ToastTitle, useToast } from './ui/toast';
 
 export default function Categories() {
   const router = useRouter();
+  const toast = useToast();
   const { user, accessToken, logout } = useAuth();
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [categories, setCategories] = useState<CategoryResponseDataDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
   const handleImageError = (index: number) => {
     setFailedImages(prev => new Set(prev).add(index));
@@ -31,11 +48,14 @@ export default function Categories() {
         setError(null);
 
         // Make authenticated request to /categories
-        const response = await apiClient.authenticatedRequest<
-          CategoryResponse[]
-        >('/categories', { method: 'GET' }, accessToken || '');
+        const response =
+          await apiClient.authenticatedRequest<CategoriesResponseDto>(
+            '/categories',
+            { method: 'GET' },
+            accessToken || ''
+          );
 
-        setCategories(response);
+        setCategories(response.data);
       } catch (err) {
         console.error('Failed to fetch categories:', err);
         setError('Failed to load categories');
@@ -68,6 +88,71 @@ export default function Categories() {
 
   const handleAddCategory = () => {
     router.push('/category/add');
+  };
+
+  const handleEditCategory = (categoryId: string) => {
+    router.push({
+      pathname: '/category/edit',
+      params: { id: categoryId },
+    });
+  };
+
+  const handleRemoveCategory = (categoryId: string) => {
+    setCategoryToDelete(categoryId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    try {
+      const response = await apiClient.authenticatedRequest<{
+        message: string;
+      }>(
+        `/categories/${categoryToDelete}`,
+        { method: 'DELETE' },
+        accessToken || ''
+      );
+
+      // Remove from local state
+      setCategories(prev => prev.filter(cat => cat.id !== categoryToDelete));
+      toast.show({
+        placement: 'top',
+        duration: 3000,
+        render: ({ id }) => {
+          return (
+            <Toast action='muted' variant='solid'>
+              <ToastTitle>{response.message}</ToastTitle>
+            </Toast>
+          );
+        },
+      });
+    } catch (error) {
+      console.error('Failed to remove category:', error);
+      toast.show({
+        placement: 'top',
+        duration: 3000,
+        render: ({ id }) => {
+          return (
+            <Toast action='muted' variant='solid'>
+              <ToastTitle>
+                {error instanceof Error
+                  ? error.message
+                  : 'Failed to remove category'}
+              </ToastTitle>
+            </Toast>
+          );
+        },
+      });
+    } finally {
+      setShowDeleteDialog(false);
+      setCategoryToDelete(null);
+    }
+  };
+
+  const cancelDeleteCategory = () => {
+    setShowDeleteDialog(false);
+    setCategoryToDelete(null);
   };
 
   if (loading) {
@@ -124,6 +209,26 @@ export default function Categories() {
                     />
                   )}
                 </Pressable>
+                {user?.role === 'admin' && (
+                  <HStack space='md'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onPress={() => handleEditCategory(category.id)}
+                      className='bg-yellow-500 p-2'
+                    >
+                      <EditIcon className='h-4 w-4 text-white' />
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onPress={() => handleRemoveCategory(category.id)}
+                      className='bg-red-500 p-2 text-white'
+                    >
+                      <TrashIcon className='h-4 w-4 text-white' />
+                    </Button>
+                  </HStack>
+                )}
                 <Text className='max-w-24 text-center text-sm font-medium'>
                   {category.name}
                 </Text>
@@ -146,6 +251,40 @@ export default function Categories() {
           </HStack>
         </VStack>
       </VStack>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog isOpen={showDeleteDialog} onClose={cancelDeleteCategory}>
+        <AlertDialogBackdrop />
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <Text className='text-lg font-semibold text-typography-900'>
+              Изтриване на категория
+            </Text>
+          </AlertDialogHeader>
+          <AlertDialogBody>
+            <Text className='text-typography-600'>
+              Сигурни ли сте, че искате да изтриете тази категория? Това
+              действие не може да бъде отменено.
+            </Text>
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button
+              variant='outline'
+              onPress={cancelDeleteCategory}
+              className='mr-2'
+            >
+              <Text>Отказ</Text>
+            </Button>
+            <Button
+              variant='solid'
+              onPress={confirmDeleteCategory}
+              className='bg-red-500'
+            >
+              <Text className='text-white'>Изтрий</Text>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </VStack>
   );
 }
