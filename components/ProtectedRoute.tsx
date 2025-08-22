@@ -1,8 +1,8 @@
-import { Center } from "@/components/ui/center";
-import { Text } from "@/components/ui/text";
-import { useAuth } from "@/lib/authContext";
-import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import { Center } from '@/components/ui/center';
+import { Text } from '@/components/ui/text';
+import { useAuth } from '@/store/authContext';
+import { useRouter } from 'expo-router';
+import React, { useEffect } from 'react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,13 +15,13 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     if (!isLoading && !user) {
       // Redirect to auth form if not authenticated
-      router.replace("/");
+      router.replace('/');
     }
   }, [user, isLoading, router]);
 
   if (isLoading) {
     return (
-      <Center className="flex-1">
+      <Center className='flex-1'>
         <Text>Зареждане...</Text>
       </Center>
     );
@@ -29,7 +29,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!user) {
     return (
-      <Center className="flex-1">
+      <Center className='flex-1'>
         <Text>Пренасочване към вход...</Text>
       </Center>
     );

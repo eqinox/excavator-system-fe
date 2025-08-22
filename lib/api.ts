@@ -1,4 +1,5 @@
 import { BASE_URL } from '@/constants';
+import { authService } from './auth';
 
 // HTTP client class
 class ApiClient {
@@ -91,8 +92,7 @@ class ApiClient {
   // Authenticated request with Bearer token
   async authenticatedRequest<T>(
     endpoint: string,
-    options: RequestInit = {},
-    token: string
+    options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
@@ -104,7 +104,7 @@ class ApiClient {
       headers: {
         // Don't set Content-Type for FormData - let the browser set it automatically
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authService.getAccessToken()}`,
         ...(options.headers || {}),
       },
     };

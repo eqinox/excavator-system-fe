@@ -4,7 +4,7 @@ import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/lib/authContext';
+import { useAuth } from '@/store/authContext';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 

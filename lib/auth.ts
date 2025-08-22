@@ -116,11 +116,9 @@ class AuthService {
       // Call logout endpoint if your server has one
       if (this.accessToken) {
         try {
-          await apiClient.authenticatedRequest(
-            '/auth/logout',
-            { method: 'POST' },
-            this.accessToken
-          );
+          await apiClient.authenticatedRequest('/auth/logout', {
+            method: 'POST',
+          });
         } catch (error) {
           console.error('Logout API error:', error);
           // Continue with local logout even if API call fails
@@ -164,22 +162,14 @@ class AuthService {
     }
 
     try {
-      return await apiClient.authenticatedRequest<T>(
-        endpoint,
-        options,
-        this.accessToken
-      );
+      return await apiClient.authenticatedRequest<T>(endpoint, options);
     } catch (error: any) {
       // Handle 401 Unauthorized
       if (error.message?.includes('401')) {
         const newToken = await this.refreshToken();
         if (newToken) {
           // Retry the request with new token
-          return await apiClient.authenticatedRequest<T>(
-            endpoint,
-            options,
-            newToken
-          );
+          return await apiClient.authenticatedRequest<T>(endpoint, options);
         } else {
           // Refresh failed, logout user
           await this.logout();
@@ -264,11 +254,7 @@ class AuthService {
 
     try {
       // Call a protected endpoint to validate token
-      await apiClient.authenticatedRequest(
-        '/auth/validate',
-        { method: 'GET' },
-        this.accessToken
-      );
+      await apiClient.authenticatedRequest('/auth/validate', { method: 'GET' });
       return true;
     } catch (error: any) {
       console.log('Token validation failed:', error.message);

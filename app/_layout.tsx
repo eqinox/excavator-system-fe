@@ -4,17 +4,19 @@ import { MoonIcon, SunIcon } from '@/components/ui/icon';
 import { ThemeMode } from '@/constants';
 import '@/global.css';
 import { useTheme } from '@/hooks/useTheme';
-import { AuthProvider } from '@/lib/authContext';
+import { authService } from '@/lib/auth';
+import { AuthProvider } from '@/store/authContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
+import AppLoading from 'expo-app-loading';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -24,6 +26,7 @@ export {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [isLoading, setIsLoading] = useState(true);
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -39,32 +42,47 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
-  return <RootLayoutNav />;
+
+  useEffect(() => {
+    async function fetchToken() {
+      await authService.initialize();
+      setIsLoading(false);
+    }
+    fetchToken();
+  }, []);
+
+  if (isLoading) {
+    return <AppLoading />;
+  }
+
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
+  );
 }
 
 function RootLayoutNav() {
   const { colorMode, handleThemeChange } = useTheme();
 
   return (
-    <AuthProvider>
-      <GluestackUIProvider mode={colorMode}>
-        <ThemeProvider
-          value={colorMode === ThemeMode.DARK ? DarkTheme : DefaultTheme}
+    <GluestackUIProvider mode={colorMode}>
+      <ThemeProvider
+        value={colorMode === ThemeMode.DARK ? DarkTheme : DefaultTheme}
+      >
+        <Slot />
+        <Fab
+          onPress={() =>
+            handleThemeChange(
+              colorMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK
+            )
+          }
+          className='m-6'
+          size='lg'
         >
-          <Slot />
-          <Fab
-            onPress={() =>
-              handleThemeChange(
-                colorMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK
-              )
-            }
-            className='m-6'
-            size='lg'
-          >
-            <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
-          </Fab>
-        </ThemeProvider>
-      </GluestackUIProvider>
-    </AuthProvider>
+          <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
+        </Fab>
+      </ThemeProvider>
+    </GluestackUIProvider>
   );
 }

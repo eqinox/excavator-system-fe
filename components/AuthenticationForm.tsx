@@ -12,7 +12,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/lib/authContext';
+import { useAuth } from '@/store/authContext';
 import {
   loginSchema,
   signupSchema,

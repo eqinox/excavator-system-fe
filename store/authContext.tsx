@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authService } from './auth';
-import { LoginDto, RegisterDto, UserDto } from './dto/client/auth.dto';
-import { RegisterResponseDto } from './dto/server/auth.dto';
+import { authService } from '../lib/auth';
+import { LoginDto, RegisterDto, UserDto } from '../lib/dto/client/auth.dto';
+import { RegisterResponseDto } from '../lib/dto/server/auth.dto';
 
 interface AuthContextType {
   user: UserDto | null;

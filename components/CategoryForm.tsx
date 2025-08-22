@@ -13,7 +13,7 @@ import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { apiClient } from '@/lib/api';
-import { useAuth } from '@/lib/authContext';
+import { useAuth } from '@/store/authContext';
 import { categorySchema, type CategoryFormData } from '@/validation/category';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
