@@ -8,13 +8,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { EditIcon, TrashIcon } from '@/components/ui/icon';
 import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
 import { useApp } from '@/store/appContext';
 import { useAuth } from '@/store/authContext';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image } from 'react-native';
@@ -107,7 +107,7 @@ export default function CategoriesList() {
   };
 
   return (
-    <VStack className='flex-1 justify-start px-4'>
+    <VStack className='flex-1 justify-start bg-background-100 px-4'>
       <VStack space='xl' className='w-full max-w-4xl'>
         <VStack space='md'>
           <HStack className='items-center justify-between'>
@@ -146,7 +146,7 @@ export default function CategoriesList() {
                       onPress={() => handleEditCategory(category.id)}
                       className='bg-yellow-500 p-2'
                     >
-                      <EditIcon className='h-4 w-4 text-white' />
+                      <Ionicons name='create-outline' size={16} color='white' />
                     </Button>
                     <Button
                       variant='ghost'
@@ -154,7 +154,7 @@ export default function CategoriesList() {
                       onPress={() => handleRemoveCategory(category.id)}
                       className='bg-red-500 p-2 text-white'
                     >
-                      <TrashIcon className='h-4 w-4 text-white' />
+                      <Ionicons name='trash-outline' size={16} color='white' />
                     </Button>
                   </HStack>
                 )}

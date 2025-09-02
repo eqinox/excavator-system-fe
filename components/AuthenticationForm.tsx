@@ -82,7 +82,7 @@ export default function AuthenticationForm() {
   };
 
   return (
-    <Box className='min-h-screen flex-1 bg-background-300'>
+    <Box className='min-h-screen flex-1 bg-background-100'>
       <Box className='py-safe flex-1 items-center justify-center px-4'>
         <Card className='w-full max-w-md bg-background-0 p-6 shadow-lg'>
           <VStack space='md' className='w-full'>
