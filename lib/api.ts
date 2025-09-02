@@ -42,7 +42,6 @@ class ApiClient {
       }
 
       const data = await response.json();
-      console.log('✅ API Success:', data);
       return data;
     } catch (error) {
       console.error(`❌ API request failed: ${endpoint}`, error);
@@ -121,7 +120,6 @@ class ApiClient {
       }
 
       const data = await response.json();
-      console.log('✅ API Success Response:', data);
       return data;
     } catch (error) {
       console.error(`❌ Authenticated API request failed: ${endpoint}`, error);

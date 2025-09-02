@@ -119,7 +119,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         // Check every 5 minutes
         const isValid = await authService.validateToken();
         if (!isValid) {
-          console.log('Token is invalid, logging out');
           await logout();
         }
       }

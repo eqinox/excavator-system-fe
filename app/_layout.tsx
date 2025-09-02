@@ -5,6 +5,7 @@ import { ThemeMode } from '@/constants';
 import '@/global.css';
 import { useTheme } from '@/hooks/useTheme';
 import { authService } from '@/lib/auth';
+import { AppProvider } from '@/store/appContext';
 import { AuthProvider } from '@/store/authContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {
@@ -17,6 +18,7 @@ import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -56,9 +58,13 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <AppProvider>
+          <RootLayoutNav />
+        </AppProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
@@ -70,18 +76,20 @@ function RootLayoutNav() {
       <ThemeProvider
         value={colorMode === ThemeMode.DARK ? DarkTheme : DefaultTheme}
       >
-        <Slot />
-        <Fab
-          onPress={() =>
-            handleThemeChange(
-              colorMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK
-            )
-          }
-          className='m-6'
-          size='lg'
-        >
-          <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
-        </Fab>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Slot />
+          <Fab
+            onPress={() =>
+              handleThemeChange(
+                colorMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK
+              )
+            }
+            className='m-6'
+            size='lg'
+          >
+            <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
+          </Fab>
+        </SafeAreaView>
       </ThemeProvider>
     </GluestackUIProvider>
   );

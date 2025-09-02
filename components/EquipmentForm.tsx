@@ -60,7 +60,6 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
 
   const pickImages = async () => {
     try {
-      console.log('📸 Starting image picker...');
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
@@ -70,10 +69,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
         allowsEditing: false, // Don't allow editing
       });
 
-      console.log('📸 ImagePicker result:', result);
-
       if (!result.canceled && result.assets) {
-        console.log('📸 ImagePicker result:', result.assets);
         const newImages = result.assets.map((asset: any) => {
           // Determine file type from asset or URI extension
           let fileType = asset.type || 'image/jpeg';
@@ -93,13 +89,6 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
               fileType = 'image/jpeg';
             }
           }
-
-          console.log('📸 Processing asset:', {
-            uri: asset.uri,
-            type: fileType,
-            name: fileName,
-            asset: asset,
-          });
 
           return {
             uri: asset.uri,
@@ -150,20 +139,9 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
       }
 
       // Add images
-      console.log('📸 Adding images to FormData:', selectedImages.length);
       selectedImages.forEach((image, index) => {
-        console.log(`📸 Image ${index}:`, {
-          uri: image.uri,
-          type: image.type,
-          name: image.name,
-        });
-
         // For web, use the actual File object if available
         if (image.file) {
-          console.log(
-            `📸 Appending File object ${index} to FormData:`,
-            image.file
-          );
           formData.append('images', image.file);
         } else {
           // For React Native/Expo, we need to create a proper file object
@@ -174,12 +152,9 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
             name: image.name,
           };
 
-          console.log(`📸 Appending image ${index} to FormData:`, imageFile);
           formData.append('images', imageFile as any);
         }
       });
-
-      console.log('📤 FormData created with images');
 
       await apiClient.authenticatedRequest(
         '/equipment',
@@ -364,14 +339,12 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                     onChange={e => {
                       const files = e.target.files;
                       if (files) {
-                        console.log('📸 Web file input files:', files);
                         const newImages = Array.from(files).map(file => ({
                           uri: URL.createObjectURL(file),
                           type: file.type,
                           name: file.name,
                           file: file, // Store the actual File object
                         }));
-                        console.log('📸 Web files processed:', newImages);
                         setSelectedImages(prev => [...prev, ...newImages]);
                       }
                     }}

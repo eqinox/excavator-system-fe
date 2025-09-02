@@ -13,8 +13,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
-import { apiClient } from '@/lib/api';
-import { CategoryResponseDataDto } from '@/lib/dto/server/category.dto';
+import { useApp } from '@/store/appContext';
 import { useAuth } from '@/store/authContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -22,14 +21,12 @@ import { Image } from 'react-native';
 import { Button } from './ui/button';
 import { Toast, ToastTitle, useToast } from './ui/toast';
 
-interface CategoriesProps {
-  categories: CategoryResponseDataDto[];
-}
-
-export default function Categories({ categories }: CategoriesProps) {
+export default function CategoriesList() {
   const router = useRouter();
   const toast = useToast();
   const { user, logout } = useAuth();
+  const { deleteCategory, categories } = useApp();
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
@@ -68,9 +65,7 @@ export default function Categories({ categories }: CategoriesProps) {
     if (!categoryToDelete) return;
 
     try {
-      const response = await apiClient.authenticatedRequest<{
-        message: string;
-      }>(`/categories/${categoryToDelete}`, { method: 'DELETE' });
+      await deleteCategory(categoryToDelete);
 
       toast.show({
         placement: 'top',
@@ -78,7 +73,7 @@ export default function Categories({ categories }: CategoriesProps) {
         render: ({ id }) => {
           return (
             <Toast action='muted' variant='solid'>
-              <ToastTitle>{response.message}</ToastTitle>
+              <ToastTitle>Category deleted successfully</ToastTitle>
             </Toast>
           );
         },
@@ -136,7 +131,7 @@ export default function Categories({ categories }: CategoriesProps) {
                   {category.image && (
                     <Image
                       source={{
-                        uri: `${BASE_URL}/images/${category.image.small}`,
+                        uri: `${BASE_URL}/${category.image.small}`,
                       }}
                       className='h-full w-full'
                       resizeMode='cover'

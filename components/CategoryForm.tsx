@@ -12,31 +12,36 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { apiClient } from '@/lib/api';
-import { useAuth } from '@/store/authContext';
-import { categorySchema, type CategoryFormData } from '@/validation/category';
+import { useApp } from '@/store/appContext';
+import {
+  categoryCreateSchema,
+  categoryUpdateSchema,
+  type CategoryCreateData,
+  type CategoryUpdateData,
+} from '@/validation/category';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Image } from 'react-native';
 
 interface CategoryFormProps {
   mode?: 'create' | 'edit';
-  initialData?: CategoryFormData;
+  initialData?: CategoryUpdateData | CategoryCreateData;
 }
 
 export default function CategoryForm({
   mode = 'create',
   initialData,
 }: CategoryFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { accessToken } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const { addCategory, editCategory, isLoading, error, clearError } = useApp();
   const isEditMode = mode === 'edit' || params.mode === 'edit';
+
+  // Use different schemas based on mode
+  const schema = isEditMode ? categoryUpdateSchema : categoryCreateSchema;
 
   const {
     control,
@@ -45,8 +50,8 @@ export default function CategoryForm({
     reset,
     setValue,
     watch,
-  } = useForm<CategoryFormData>({
-    resolver: zodResolver(categorySchema),
+  } = useForm<CategoryUpdateData | CategoryCreateData>({
+    resolver: zodResolver(schema),
     defaultValues: initialData || {
       name: '',
       image: null,
@@ -59,8 +64,16 @@ export default function CategoryForm({
   useEffect(() => {
     if (initialData) {
       setValue('name', initialData.name);
+      if (isEditMode && 'id' in initialData) {
+        setValue('id', initialData.id);
+      }
     }
-  }, [initialData, setValue]);
+  }, [initialData, setValue, isEditMode]);
+
+  // Clear error when component mounts
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const pickImage = async () => {
     try {
@@ -69,81 +82,76 @@ export default function CategoryForm({
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
-        base64: false,
+        base64: true,
       });
 
       if (!result.canceled && result.assets[0]) {
         setValue('image', result.assets[0]);
       }
     } catch (error) {
-      setError('Грешка при избор на снимка');
+      console.error('Error picking image:', error);
     }
   };
 
-  const onSubmit = async (data: CategoryFormData) => {
-    setIsSubmitting(true);
-    setError(null);
-
+  const onSubmit = async (data: CategoryUpdateData | CategoryCreateData) => {
     try {
       if (isEditMode) {
-        // TODO: Implement edit API call
-        // await updateCategory(categoryId, data);
+        const updateData = data as CategoryUpdateData;
+
+        const img: any = (updateData as any).image;
+        const payload: any = { name: updateData.name };
+
+        if (img) {
+          if (typeof img === 'object' && img.base64) {
+            payload.image = img.base64 as string;
+          } else if (
+            typeof img === 'object' &&
+            typeof img.uri === 'string' &&
+            img.uri.startsWith('data:')
+          ) {
+            const commaIndex = img.uri.indexOf(',');
+            if (commaIndex !== -1)
+              payload.image = img.uri.substring(commaIndex + 1);
+          } else if (typeof img === 'string' && img.startsWith('data:')) {
+            const commaIndex = img.indexOf(',');
+            if (commaIndex !== -1)
+              payload.image = img.substring(commaIndex + 1);
+          }
+        }
+
+        await editCategory(updateData.id, payload);
       } else {
-        // Validate that image is selected
-        if (!data.image) {
-          throw new Error('Снимката е задължителна');
+        const createdCategory = data as CategoryCreateData;
+        const img: any = (createdCategory as any).image;
+
+        let base64Image: string | null = null;
+        if (img && typeof img === 'object' && img.base64) {
+          base64Image = img.base64 as string;
+        } else if (
+          img &&
+          typeof img === 'object' &&
+          typeof img.uri === 'string' &&
+          img.uri.startsWith('data:')
+        ) {
+          const commaIndex = img.uri.indexOf(',');
+          if (commaIndex !== -1)
+            base64Image = img.uri.substring(commaIndex + 1);
+        } else if (typeof img === 'string' && img.startsWith('data:')) {
+          const commaIndex = img.indexOf(',');
+          if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
         }
 
-        // Create FormData exactly like Postman
-        const formData = new FormData();
-
-        // Text field (like Postman form-data text field)
-        formData.append('name', data.name);
-
-        // File field (like Postman form-data file field)
-        // For web browsers, we need to convert base64 to a Blob
-        if (data.image.uri.startsWith('data:')) {
-          // Convert base64 to Blob
-          const response = await fetch(data.image.uri);
-          const blob = await response.blob();
-
-          // Create a File object from the Blob
-          const file = new File(
-            [blob],
-            data.image.fileName || 'category-image.jpg',
-            {
-              type: data.image.mimeType || 'image/jpeg',
-            }
-          );
-
-          formData.append('image', file);
-        } else {
-          // For non-base64 URIs (native React Native)
-          const imageFile = {
-            uri: data.image.uri,
-            type: data.image.type || 'image/jpeg',
-            name: data.image.fileName || 'category-image.jpg',
-          };
-          formData.append('image', imageFile as any);
-        }
-
-        const response = await apiClient.authenticatedRequest(
-          '/categories',
-          {
-            method: 'POST',
-            body: formData,
-          },
-          accessToken || ''
-        );
-
-        router.replace('/categories');
+        const result = await addCategory({
+          name: createdCategory.name,
+          image: base64Image || '',
+        });
       }
 
+      router.replace('/categories');
       reset();
     } catch (error: any) {
-      setError(error.message || 'Възникна грешка при създаване на категорията');
-    } finally {
-      setIsSubmitting(false);
+      console.log('❌ Error caught:', error);
+      console.log('❌ Error message:', error.message);
     }
   };
 
@@ -153,7 +161,7 @@ export default function CategoryForm({
 
   return (
     <Box className='min-h-screen flex-1 bg-background-300'>
-      <Box className='py-safe flex-1 items-center justify-center px-4'>
+      <Box className='flex-1 items-center justify-center px-4 py-4'>
         <Card className='w-full max-w-md bg-background-0 p-6 shadow-lg'>
           <VStack space='md' className='w-full'>
             {/* Header */}
@@ -221,8 +229,9 @@ export default function CategoryForm({
                 <VStack space='sm'>
                   {selectedImage ? (
                     <Box className='items-center'>
+                      {/* <AuthenticatedImage uri={selectedImage} /> */}
                       <Image
-                        source={{ uri: selectedImage.uri }}
+                        source={{ uri: selectedImage.uri || selectedImage }}
                         className='h-32 w-32 rounded-lg'
                         resizeMode='cover'
                       />
@@ -260,10 +269,10 @@ export default function CategoryForm({
                 size='lg'
                 className='mt-4 bg-primary-500'
                 onPress={handleSubmit(onSubmit)}
-                isDisabled={isSubmitting}
+                isDisabled={isLoading}
               >
                 <ButtonText>
-                  {isSubmitting
+                  {isLoading
                     ? 'Обработване...'
                     : isEditMode
                       ? 'Запази промените'
@@ -280,7 +289,7 @@ export default function CategoryForm({
                 className='mt-2'
                 onPress={() => {
                   reset();
-                  router.back();
+                  router.replace('/categories');
                 }}
               >
                 <ButtonText>Отказ</ButtonText>

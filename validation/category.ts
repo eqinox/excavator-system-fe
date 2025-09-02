@@ -1,37 +1,44 @@
 import { z } from 'zod';
 
-// Category validation schema for form (includes image for frontend validation)
-export const categorySchema = z.object({
+// Base category schema (common fields)
+const categoryBaseSchema = z.object({
   name: z
     .string()
     .min(1, 'Името на категорията е задължително')
     .min(2, 'Името трябва да бъде поне 2 символа')
     .max(100, 'Името не може да бъде по-дълго от 100 символа'),
+});
+
+// Category validation schema for creating (no id needed)
+export const categoryCreateSchema = categoryBaseSchema.extend({
   image: z.any().refine(file => file !== null, {
     message: 'Снимката е задължителна',
   }),
 });
 
-// API request schema (only name field, image is handled separately)
-export const categoryApiSchema = z.object({
-  name: z
-    .string()
-    .min(1, 'Името на категорията е задължително')
-    .min(2, 'Името трябва да бъде поне 2 символа')
-    .max(100, 'Името не може да бъде по-дълго от 100 символа'),
+// Category validation schema for updating (id is required)
+export const categoryUpdateSchema = categoryBaseSchema.extend({
+  id: z.string().min(1, 'ID на категорията е задължително'),
+  image: z.any().optional(), // Image might be optional for updates
 });
 
+export const categorySchema = categoryUpdateSchema;
+
 // Type definitions
-export type CategoryFormData = z.infer<typeof categorySchema>;
-export type CategoryApiData = z.infer<typeof categoryApiSchema>;
+export type CategoryCreateData = z.infer<typeof categoryCreateSchema>;
+export type CategoryUpdateData = z.infer<typeof categoryUpdateSchema>;
 
 // Validation functions
 export const validateCategoryName = (name: string): string | null => {
-  const result = categorySchema.shape.name.safeParse(name);
+  const result = categoryBaseSchema.shape.name.safeParse(name);
   return result.success ? null : result.error.issues[0].message;
 };
 
 // Full form validation functions
-export const validateCategoryForm = (data: CategoryFormData) => {
-  return categorySchema.safeParse(data);
+export const validateCategoryCreateForm = (data: CategoryCreateData) => {
+  return categoryCreateSchema.safeParse(data);
+};
+
+export const validateCategoryUpdateForm = (data: CategoryUpdateData) => {
+  return categoryUpdateSchema.safeParse(data);
 };

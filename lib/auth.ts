@@ -52,7 +52,6 @@ class AuthService {
 
       // Check if token is expired
       if (this.isTokenExpired()) {
-        console.log('Token is expired, clearing auth data');
         await this.clearAuthData();
       }
     } catch (error) {
@@ -229,8 +228,6 @@ class AuthService {
       removeStorageItem(USER_DATA_KEY),
       removeStorageItem(TOKEN_EXPIRY_KEY),
     ]);
-
-    console.log('Auth data cleared securely');
   }
 
   private tokenExpiry: number | null = null;

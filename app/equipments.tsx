@@ -28,7 +28,7 @@ export default function Equipments() {
         const response = await apiClient.authenticatedRequest<
           EquipmentResponse[]
         >(`/equipment/category/${id}`, { method: 'GET' }, accessToken || '');
-        console.log('equipments', response);
+
         setEquipments(response);
       } catch (error) {
         console.error(error);

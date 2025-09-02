@@ -5,6 +5,7 @@ import React from 'react';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Center } from '@/components/ui/center';
+import { Text } from '@/components/ui/text';
 import { useAuth } from '@/store/authContext';
 
 export default function TabLayout() {
@@ -12,7 +13,11 @@ export default function TabLayout() {
   const { isLoading } = useAuth();
 
   if (isLoading) {
-    return <Center>Loading...</Center>;
+    return (
+      <Center>
+        <Text>Loading...</Text>
+      </Center>
+    );
   }
 
   return (
