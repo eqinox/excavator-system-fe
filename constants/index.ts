@@ -10,7 +10,7 @@ const getApiBaseUrl = () => {
     return 'https://276f1a4d70d1.ngrok-free.app';
   } else {
     // For Android, use your computer's IP address
-    return 'http://151.251.82.193:5000';
+    return 'http://151.251.82.183:5000';
   }
 };
 

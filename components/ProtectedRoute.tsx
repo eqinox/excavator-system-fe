@@ -1,6 +1,6 @@
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import React from 'react';
 
 export default function Dashboard() {

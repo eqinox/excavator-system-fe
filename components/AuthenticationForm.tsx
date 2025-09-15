@@ -12,7 +12,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import {
   loginSchema,
   signupSchema,
@@ -49,6 +49,7 @@ export default function AuthenticationForm() {
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsSubmitting(true);
+
     try {
       if (isLogin) {
         await login({

@@ -1,12 +1,12 @@
 import AuthenticationForm from '@/components/AuthenticationForm';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
 export default function AuthScreen() {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {

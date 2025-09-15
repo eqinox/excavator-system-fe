@@ -8,7 +8,7 @@ import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
 import { findCategoryById } from '@/lib/categories';
 import { CategoryResponseDataDto } from '@/lib/dto/server/category.dto';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import { CategoryUpdateData } from '@/validation/category';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';

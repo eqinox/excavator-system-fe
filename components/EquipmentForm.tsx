@@ -12,7 +12,7 @@ import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { apiClient } from '@/lib/api';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 import {
   equipmentSchema,
   type EquipmentFormData,

@@ -1,3 +1,4 @@
+import ReduxInitializer from '@/components/ReduxInitializer';
 import { Fab, FabIcon } from '@/components/ui/fab';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { MoonIcon, SunIcon } from '@/components/ui/icon';
@@ -5,8 +6,7 @@ import { ThemeMode } from '@/constants';
 import '@/global.css';
 import { useTheme } from '@/hooks/useTheme';
 import { authService } from '@/lib/auth';
-import { AppProvider } from '@/store/appContext';
-import { AuthProvider } from '@/store/authContext';
+import { store } from '@/redux/store';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {
   DarkTheme,
@@ -19,6 +19,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,11 +60,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <AppProvider>
+      <Provider store={store}>
+        <ReduxInitializer>
           <RootLayoutNav />
-        </AppProvider>
-      </AuthProvider>
+        </ReduxInitializer>
+      </Provider>
     </SafeAreaProvider>
   );
 }

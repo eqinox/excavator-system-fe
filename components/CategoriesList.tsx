@@ -12,8 +12,7 @@ import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
-import { useApp } from '@/store/appContext';
-import { useAuth } from '@/store/authContext';
+import { useAuth, useCategories } from '@/redux/useReduxHooks';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -25,7 +24,7 @@ export default function CategoriesList() {
   const router = useRouter();
   const toast = useToast();
   const { user, logout } = useAuth();
-  const { deleteCategory, categories } = useApp();
+  const { deleteCategory, categories } = useCategories();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);

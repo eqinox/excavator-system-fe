@@ -26,7 +26,10 @@ class ApiClient {
     };
 
     try {
+      console.log('before fetch');
       const response = await fetch(url, config);
+
+      console.log('after fetch');
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

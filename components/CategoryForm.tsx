@@ -12,7 +12,7 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useApp } from '@/store/appContext';
+import { useCategories } from '@/redux/useReduxHooks';
 import {
   categoryCreateSchema,
   categoryUpdateSchema,
@@ -37,7 +37,13 @@ export default function CategoryForm({
 }: CategoryFormProps) {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { addCategory, editCategory, isLoading, error, clearError } = useApp();
+  const {
+    addCategory,
+    editCategory,
+    categoriesLoading,
+    categoriesError,
+    clearCategoriesError,
+  } = useCategories();
   const isEditMode = mode === 'edit' || params.mode === 'edit';
 
   // Use different schemas based on mode
@@ -72,8 +78,8 @@ export default function CategoryForm({
 
   // Clear error when component mounts
   useEffect(() => {
-    clearError();
-  }, [clearError]);
+    clearCategoriesError();
+  }, [clearCategoriesError]);
 
   const pickImage = async () => {
     try {
@@ -180,9 +186,11 @@ export default function CategoryForm({
 
             <VStack space='md' className='w-full'>
               {/* Global error message */}
-              {error && (
+              {categoriesError && (
                 <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
-                  <Text className='text-sm text-error-600'>{error}</Text>
+                  <Text className='text-sm text-error-600'>
+                    {categoriesError}
+                  </Text>
                 </Box>
               )}
 
@@ -269,10 +277,10 @@ export default function CategoryForm({
                 size='lg'
                 className='mt-4 bg-primary-500'
                 onPress={handleSubmit(onSubmit)}
-                isDisabled={isLoading}
+                isDisabled={categoriesLoading}
               >
                 <ButtonText>
-                  {isLoading
+                  {categoriesLoading
                     ? 'Обработване...'
                     : isEditMode
                       ? 'Запази промените'

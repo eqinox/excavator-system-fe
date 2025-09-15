@@ -6,11 +6,11 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
-import { useAuth } from '@/store/authContext';
+import { useAuth } from '@/redux/useReduxHooks';
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
-  const { isLoading } = useAuth();
+  const { loading: isLoading } = useAuth();
 
   if (isLoading) {
     return (

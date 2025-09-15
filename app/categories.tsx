@@ -2,11 +2,12 @@ import CategoriesList from '@/components/CategoriesList';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
-import { useApp } from '@/store/appContext';
+import { useCategories } from '@/redux/useReduxHooks';
 import { useEffect } from 'react';
 
 export default function CategoriesRoute() {
-  const { categoriesLoading, categoriesError, refreshCategories } = useApp();
+  const { categoriesLoading, categoriesError, refreshCategories } =
+    useCategories();
 
   useEffect(() => {
     refreshCategories();
