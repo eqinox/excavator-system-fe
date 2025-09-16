@@ -22,96 +22,67 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  Platform,
-  Pressable,
-  Image as RNImage,
-  ScrollView,
-} from 'react-native';
+import { Alert, Pressable, Image as RNImage, ScrollView } from 'react-native';
 
 interface EquipmentFormProps {
   categoryId: string;
 }
 
-interface ImageFile {
-  uri: string;
-  type: string;
-  name: string;
-  file?: File; // For web file input
-}
-
 export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
   const router = useRouter();
-  const { accessToken, user } = useAuth();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedImages, setSelectedImages] = useState<ImageFile[]>([]);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset,
+    setValue,
+    watch,
   } = useForm<EquipmentFormData>({
     resolver: zodResolver(equipmentSchema),
     mode: 'onChange',
+    defaultValues: {
+      name: '',
+      description: '',
+      price_per_day: '',
+      location_id: '',
+      available: true,
+      images: [],
+    },
   });
+
+  const selectedImages = watch('images');
 
   const pickImages = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsMultipleSelection: true,
-        quality: 0.8,
+        allowsEditing: true,
         aspect: [4, 3],
-        base64: false, // Don't use base64
-        allowsEditing: false, // Don't allow editing
+        quality: 0.8,
+        base64: true,
       });
 
       if (!result.canceled && result.assets) {
-        const newImages = result.assets.map((asset: any) => {
-          // Determine file type from asset or URI extension
-          let fileType = asset.type || 'image/jpeg';
-          let fileName =
-            asset.fileName ||
-            `image_${Date.now()}_${Math.random()
-              .toString(36)
-              .substr(2, 9)}.jpg`;
-
-          // If no file type is provided, try to determine from URI
-          if (!asset.type) {
-            const uri = asset.uri.toLowerCase();
-            if (uri.includes('.png')) {
-              fileType = 'image/png';
-              fileName = fileName.replace('.jpg', '.png');
-            } else if (uri.includes('.jpeg') || uri.includes('.jpg')) {
-              fileType = 'image/jpeg';
-            }
-          }
-
-          return {
-            uri: asset.uri,
-            type: fileType,
-            name: fileName,
-          };
-        });
-        setSelectedImages(prev => [...prev, ...newImages]);
-      } else {
-        console.log('📸 ImagePicker was canceled or no assets');
+        const newImages = result.assets.map((asset: any) => asset);
+        setValue('images', [...(selectedImages || []), ...newImages]);
       }
     } catch (error) {
-      console.error('ImagePicker error:', error);
-      Alert.alert('Грешка', 'Неуспешно избиране на изображения');
+      console.error('Error picking images:', error);
     }
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    const updatedImages = (selectedImages || []).filter((_, i) => i !== index);
+    setValue('images', updatedImages);
   };
 
   const validateImages = (): boolean => {
-    if (selectedImages.length === 0) {
+    if (!selectedImages || selectedImages.length === 0) {
       Alert.alert('Грешка', 'Моля, изберете поне едно изображение');
       return false;
     }
@@ -138,33 +109,37 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
         formData.append('owner', user.id);
       }
 
-      // Add images
-      selectedImages.forEach((image, index) => {
-        // For web, use the actual File object if available
-        if (image.file) {
-          formData.append('images', image.file);
-        } else {
-          // For React Native/Expo, we need to create a proper file object
-          // The server expects Express.Multer.File[] which has these properties
-          const imageFile = {
-            uri: image.uri,
-            type: image.type,
-            name: image.name,
-          };
+      // Process images the same way as CategoryForm
+      if (selectedImages && selectedImages.length > 0) {
+        selectedImages.forEach((img: any) => {
+          let base64Image: string | null = null;
 
-          formData.append('images', imageFile as any);
-        }
+          if (img && typeof img === 'object' && img.base64) {
+            base64Image = img.base64 as string;
+          } else if (
+            img &&
+            typeof img === 'object' &&
+            typeof img.uri === 'string' &&
+            img.uri.startsWith('data:')
+          ) {
+            const commaIndex = img.uri.indexOf(',');
+            if (commaIndex !== -1)
+              base64Image = img.uri.substring(commaIndex + 1);
+          } else if (typeof img === 'string' && img.startsWith('data:')) {
+            const commaIndex = img.indexOf(',');
+            if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
+          }
+
+          if (base64Image) {
+            formData.append('images', base64Image);
+          }
+        });
+      }
+
+      await apiClient.authenticatedRequest('/equipment', {
+        method: 'POST',
+        body: formData,
       });
-
-      await apiClient.authenticatedRequest(
-        '/equipment',
-        {
-          method: 'POST',
-          body: formData,
-          // Don't set Content-Type for FormData - let the browser set it automatically
-        },
-        accessToken || ''
-      );
 
       Alert.alert('Успех', 'Оборудването е създадено успешно!', [
         {
@@ -327,48 +302,21 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                   disabled={isSubmitting}
                   className='w-full'
                 >
-                  <ButtonText>Избери изображения (Expo)</ButtonText>
+                  <ButtonText>Избери изображения</ButtonText>
                 </Button>
-
-                {/* Web fallback file input */}
-                {Platform.OS === 'web' && (
-                  <input
-                    type='file'
-                    multiple
-                    accept='image/*'
-                    onChange={e => {
-                      const files = e.target.files;
-                      if (files) {
-                        const newImages = Array.from(files).map(file => ({
-                          uri: URL.createObjectURL(file),
-                          type: file.type,
-                          name: file.name,
-                          file: file, // Store the actual File object
-                        }));
-                        setSelectedImages(prev => [...prev, ...newImages]);
-                      }
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                    }}
-                  />
-                )}
               </VStack>
 
-              {selectedImages.length > 0 && (
+              {selectedImages && selectedImages.length > 0 && (
                 <VStack space='sm'>
                   <Text className='text-sm text-gray-600'>
                     Избрани изображения ({selectedImages.length})
                   </Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <HStack space='sm'>
-                      {selectedImages.map((image, index) => (
+                      {selectedImages.map((image: any, index: number) => (
                         <Box key={index} className='relative'>
                           <RNImage
-                            source={{ uri: image.uri }}
+                            source={{ uri: image.uri || image }}
                             className='h-20 w-20 rounded-lg'
                             resizeMode='cover'
                           />
@@ -385,7 +333,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                 </VStack>
               )}
 
-              {selectedImages.length === 0 && (
+              {(!selectedImages || selectedImages.length === 0) && (
                 <FormControlError>
                   <FormControlErrorText>
                     Поне едно изображение е задължително
@@ -423,7 +371,12 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
             variant='solid'
             size='md'
             className='w-full'
-            disabled={!isValid || isSubmitting || selectedImages.length === 0}
+            disabled={
+              !isValid ||
+              isSubmitting ||
+              !selectedImages ||
+              selectedImages.length === 0
+            }
           >
             <ButtonText>
               {isSubmitting ? 'Създаване...' : 'Публикувай оборудване'}

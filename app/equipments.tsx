@@ -5,43 +5,27 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { BASE_URL } from '@/constants';
-import { apiClient, EquipmentResponse } from '@/lib/api';
-import { useAuth } from '@/redux/useReduxHooks';
+import { useEquipment } from '@/redux/useReduxHooks';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Image } from 'react-native';
 
 export default function Equipments() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { accessToken } = useAuth();
-  const [equipments, setEquipments] = useState<EquipmentResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    getEquipmentById,
+    equipmentLoading: loading,
+    equipmentError: error,
+    selectedEquipment,
+  } = useEquipment();
 
+  // Fetch equipment when component mounts or category ID changes
   useEffect(() => {
-    const fetchEquipments = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await apiClient.authenticatedRequest<
-          EquipmentResponse[]
-        >(`/equipment/category/${id}`, { method: 'GET' }, accessToken || '');
-
-        setEquipments(response);
-      } catch (error) {
-        console.error(error);
-        setError('Failed to load equipments');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (accessToken) {
-      fetchEquipments();
+    if (id && typeof id === 'string') {
+      getEquipmentById(id);
     }
-  }, [accessToken]);
+  }, [id]);
 
   const handleCreateEquipment = () => {
     router.push({
@@ -66,32 +50,51 @@ export default function Equipments() {
 
           <VStack space='xl' className='w-full max-w-4xl'>
             <VStack space='lg' className='w-full'>
-              <HStack space='md' className='flex-wrap justify-center'>
-                {equipments.map((equipment, index) => (
-                  <VStack key={index} space='sm' className='items-center'>
+              {loading && (
+                <Text className='text-center text-lg font-medium'>
+                  Зареждане...
+                </Text>
+              )}
+
+              {error && (
+                <Text className='text-center text-lg font-medium text-red-500'>
+                  Грешка: {error}
+                </Text>
+              )}
+
+              {!loading && !error && selectedEquipment && (
+                <HStack space='md' className='flex-wrap justify-center'>
+                  <VStack space='sm' className='items-center'>
                     <Box className='bg-primary flex h-48 w-48 items-center justify-center overflow-hidden rounded-lg shadow-md'>
-                      {equipment.images && (
-                        <Image
-                          source={{
-                            uri: `${BASE_URL}/images/${equipment.images[0].small}`,
-                          }}
-                          className='h-full w-full'
-                          resizeMode='cover'
-                        />
-                      )}
+                      {selectedEquipment.images &&
+                        selectedEquipment.images.length > 0 && (
+                          <Image
+                            source={{
+                              uri: `${BASE_URL}/images/${selectedEquipment.images[0]}`,
+                            }}
+                            className='h-full w-full'
+                            resizeMode='cover'
+                          />
+                        )}
                     </Box>
                     <Text className='max-w-24 text-center text-sm font-medium'>
-                      {equipment.name}
+                      {selectedEquipment.name}
+                    </Text>
+                    <Text className='max-w-48 text-center text-xs text-gray-600'>
+                      {selectedEquipment.description}
+                    </Text>
+                    <Text className='text-center text-sm font-bold text-green-600'>
+                      {selectedEquipment.price_per_day} лв/ден
                     </Text>
                   </VStack>
-                ))}
+                </HStack>
+              )}
 
-                {equipments.length === 0 && (
-                  <Text className='text-center text-lg font-medium'>
-                    Няма налично оборудване
-                  </Text>
-                )}
-              </HStack>
+              {!loading && !error && !selectedEquipment && (
+                <Text className='text-center text-lg font-medium'>
+                  Няма налично оборудване
+                </Text>
+              )}
             </VStack>
           </VStack>
         </VStack>

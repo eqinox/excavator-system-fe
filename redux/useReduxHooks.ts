@@ -8,6 +8,7 @@ import {
   setSelectedCategory,
   updateCategoryById,
 } from './categoriesSlice';
+import { fetchEquipmentById } from './equipmentSlice';
 import { useAppDispatch, useAppSelector } from './hooks';
 import {
   clearUser,
@@ -48,6 +49,25 @@ export const useCategories = () => {
     clearSelectedCategory: () => dispatch(clearSelectedCategory()),
     setSelectedCategory: (category: any) =>
       dispatch(setSelectedCategory(category)),
+  };
+};
+
+// Equipment hooks
+export const useEquipment = () => {
+  const dispatch = useAppDispatch();
+  const { equipments, loading, error, selectedEquipment } = useAppSelector(
+    state => state.equipment
+  );
+
+  return {
+    // State
+    equipments,
+    equipmentLoading: loading,
+    equipmentError: error,
+    selectedEquipment,
+
+    // Actions
+    getEquipmentById: (id: string) => dispatch(fetchEquipmentById(id)),
   };
 };
 
@@ -94,14 +114,18 @@ export const useApp = () => {
   const { loading: categoriesLoading, error: categoriesError } = useAppSelector(
     state => state.categories
   );
+  const { loading: equipmentLoading, error: equipmentError } = useAppSelector(
+    state => state.equipment
+  );
 
   return {
     // Global app state
-    isLoading: userLoading || categoriesLoading,
-    error: userError || categoriesError,
+    isLoading: userLoading || categoriesLoading || equipmentLoading,
+    error: userError || categoriesError || equipmentError,
     clearError: () => {
       dispatch(clearUserError());
       dispatch(clearCategoriesError());
+      // Note: Add equipment error clearing when implemented
     },
   };
 };
