@@ -27,7 +27,7 @@ import { Controller, useForm } from 'react-hook-form';
 export default function AuthenticationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const params = useLocalSearchParams();
-  const { login, register } = useAuth();
+  const { login, register, error: authError } = useAuth();
   const [isLogin, setIsLogin] = useState(params.mode !== 'signup');
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +44,7 @@ export default function AuthenticationForm() {
   useEffect(() => {
     const newMode = params.mode === 'signup' ? false : true;
     setIsLogin(newMode);
+    console.log('reset?');
     reset(); // Reset form when switching modes
   }, [params.mode, reset]);
 
@@ -81,7 +82,7 @@ export default function AuthenticationForm() {
     setIsLogin(!isLogin);
     setError(null);
   };
-
+  console.log('authError', authError);
   return (
     <Box className='min-h-screen flex-1 bg-background-100'>
       <Box className='py-safe flex-1 items-center justify-center px-4'>
@@ -104,6 +105,12 @@ export default function AuthenticationForm() {
               {error && (
                 <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
                   <Text className='text-sm text-error-600'>{error}</Text>
+                </Box>
+              )}
+
+              {authError && (
+                <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
+                  <Text className='text-sm text-error-600'>{authError}</Text>
                 </Box>
               )}
 
