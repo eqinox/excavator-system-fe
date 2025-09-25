@@ -112,7 +112,6 @@ const userSlice = createSlice({
     builder
       .addCase(loginUser.pending, state => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
@@ -128,7 +127,6 @@ const userSlice = createSlice({
     builder
       .addCase(registerUser.pending, state => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(registerUser.fulfilled, state => {
         state.loading = false;

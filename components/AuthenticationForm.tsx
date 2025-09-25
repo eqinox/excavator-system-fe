@@ -21,7 +21,7 @@ import {
 } from '@/validation/authentication';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export default function AuthenticationForm() {
@@ -38,19 +38,24 @@ export default function AuthenticationForm() {
     reset,
   } = useForm<LoginFormData | SignupFormData>({
     resolver: zodResolver(isLogin ? loginSchema : signupSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      username: '',
+      confirmPassword: '',
+    },
   });
 
   // Update form when mode changes
-  useEffect(() => {
-    const newMode = params.mode === 'signup' ? false : true;
-    setIsLogin(newMode);
-    console.log('reset?');
-    reset(); // Reset form when switching modes
-  }, [params.mode, reset]);
+  // useEffect(() => {
+  //   const newMode = params.mode === 'signup' ? false : true;
+  //   setIsLogin(newMode);
+  //   console.log('reset?');
+  //   reset(); // Reset form when switching modes with default values
+  // }, [params.mode, reset]);
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsSubmitting(true);
-
     try {
       if (isLogin) {
         await login({
@@ -68,7 +73,7 @@ export default function AuthenticationForm() {
         // or show a success message
       }
     } catch (error: any) {
-      setError(error.message || 'An error occurred');
+      // setError(error.message || 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }
@@ -126,7 +131,7 @@ export default function AuthenticationForm() {
                     <Input>
                       <InputField
                         placeholder='Въведете вашия имейл'
-                        value={value}
+                        value={value ?? ''}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         keyboardType='email-address'
@@ -160,7 +165,7 @@ export default function AuthenticationForm() {
                       <Input>
                         <InputField
                           placeholder='Въведете потребителско име'
-                          value={value || ''}
+                          value={value ?? ''}
                           onChangeText={onChange}
                           onBlur={onBlur}
                           autoCapitalize='none'
@@ -191,7 +196,7 @@ export default function AuthenticationForm() {
                     <Input>
                       <InputField
                         placeholder='Въведете вашата парола'
-                        value={value}
+                        value={value ?? ''}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         secureTextEntry
@@ -222,7 +227,7 @@ export default function AuthenticationForm() {
                       <Input>
                         <InputField
                           placeholder='Потвърдете вашата парола'
-                          value={value}
+                          value={value ?? ''}
                           onChangeText={onChange}
                           onBlur={onBlur}
                           secureTextEntry

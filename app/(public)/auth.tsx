@@ -6,23 +6,33 @@ import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 
 export default function AuthScreen() {
-  const { user, loading: isLoading } = useAuth();
+  const {
+    user,
+    // loading: isLoading
+  } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (
+      // !isLoading &&
+      user
+    ) {
       // If user is already authenticated, redirect to categories
       router.replace('/(private)/categories');
     }
-  }, [user, isLoading, router]);
+  }, [
+    user,
+    // isLoading,
+    router,
+  ]);
 
-  if (isLoading) {
-    return (
-      <Center className='flex-1'>
-        <Text>Зареждане...</Text>
-      </Center>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Center className='flex-1'>
+  //       <Text>Зареждане...</Text>
+  //     </Center>
+  //   );
+  // }
 
   if (user) {
     return (
