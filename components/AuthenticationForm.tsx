@@ -21,7 +21,7 @@ import {
 } from '@/validation/authentication';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 export default function AuthenticationForm() {
@@ -47,12 +47,11 @@ export default function AuthenticationForm() {
   });
 
   // Update form when mode changes
-  // useEffect(() => {
-  //   const newMode = params.mode === 'signup' ? false : true;
-  //   setIsLogin(newMode);
-  //   console.log('reset?');
-  //   reset(); // Reset form when switching modes with default values
-  // }, [params.mode, reset]);
+  useEffect(() => {
+    const newMode = params.mode === 'signup' ? false : true;
+    setIsLogin(newMode);
+    reset(); // Reset form when switching modes with default values
+  }, [params.mode, reset]);
 
   const onSubmit = async (data: LoginFormData | SignupFormData) => {
     setIsSubmitting(true);

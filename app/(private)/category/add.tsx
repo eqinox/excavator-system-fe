@@ -1,5 +1,4 @@
 import CategoryForm from '@/components/CategoryForm';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
@@ -32,9 +31,5 @@ export default function AddCategory() {
     );
   }
 
-  return (
-    <ProtectedRoute>
-      <CategoryForm mode='create' />
-    </ProtectedRoute>
-  );
+  return <CategoryForm mode='create' />;
 }

@@ -7,7 +7,6 @@ const LOGIN_USER = 'LOGIN_USER';
 const REGISTER_USER = 'REGISTER_USER';
 const LOGOUT_USER = 'LOGOUT';
 const INITIALIZE_AUTH = 'INITIALIZE_AUTH';
-const REFRESH_USER_TOKEN = 'REFRESH_TOKEN';
 const VALIDATE_USER_TOKEN = 'VALIDATE_TOKEN';
 
 // Async thunks for authentication
@@ -38,14 +37,6 @@ export const initializeAuth = createAsyncThunk(INITIALIZE_AUTH, async () => {
     isAuthenticated: authService.isAuthenticated(),
   };
 });
-
-export const refreshUserToken = createAsyncThunk(
-  REFRESH_USER_TOKEN,
-  async () => {
-    const newToken = await authService.refreshToken();
-    return newToken;
-  }
-);
 
 export const validateUserToken = createAsyncThunk(
   VALIDATE_USER_TOKEN,
@@ -153,25 +144,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Logout failed';
         // Still clear user data even if logout API fails
-        state.user = null;
-        state.isAuthenticated = false;
-        state.tokenExpiry = null;
-      });
-
-    // Refresh token
-    builder
-      .addCase(refreshUserToken.pending, state => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(refreshUserToken.fulfilled, (state, action) => {
-        state.loading = false;
-        // Token refreshed successfully
-      })
-      .addCase(refreshUserToken.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message || 'Token refresh failed';
-        // Clear user data if token refresh fails
         state.user = null;
         state.isAuthenticated = false;
         state.tokenExpiry = null;

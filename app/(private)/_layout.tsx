@@ -5,11 +5,11 @@ import { Redirect, Slot } from 'expo-router';
 import React, { useEffect } from 'react';
 
 export default function PrivateLayout() {
-  const { user, loading: isLoading } = useAuth();
+  const { loading: isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
     // This effect will trigger re-renders when auth state changes
-  }, [user, isLoading]);
+  }, [isAuthenticated, isLoading]);
 
   if (isLoading) {
     return (
@@ -19,7 +19,7 @@ export default function PrivateLayout() {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     // If not authenticated, redirect to auth screen
     return <Redirect href='/(public)/auth' />;
   }

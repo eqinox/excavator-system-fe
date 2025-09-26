@@ -1,5 +1,4 @@
 import CategoriesList from '@/components/CategoriesList';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
 import { useCategories } from '@/redux/useReduxHooks';
@@ -15,28 +14,20 @@ export default function CategoriesRoute() {
 
   if (categoriesLoading) {
     return (
-      <ProtectedRoute>
-        <Center className='flex-1'>
-          <Text>Зареждане на категории...</Text>
-        </Center>
-      </ProtectedRoute>
+      <Center className='flex-1'>
+        <Text>Зареждане на категории...</Text>
+      </Center>
     );
   }
 
   if (categoriesError) {
     return (
-      <ProtectedRoute>
-        <Center className='flex-1 px-4'>
-          <Text className='mb-4 text-red-500'>{categoriesError}</Text>
-          <Text onPress={refreshCategories}>Retry</Text>
-        </Center>
-      </ProtectedRoute>
+      <Center className='flex-1 px-4'>
+        <Text className='mb-4 text-red-500'>{categoriesError}</Text>
+        <Text onPress={refreshCategories}>Retry</Text>
+      </Center>
     );
   }
 
-  return (
-    <ProtectedRoute>
-      <CategoriesList />
-    </ProtectedRoute>
-  );
+  return <CategoriesList />;
 }

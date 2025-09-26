@@ -1,10 +1,6 @@
 import { apiClient } from './api';
 import { LoginDto, RegisterDto, UserDto } from './dto/client/auth.dto';
-import {
-  LoginResponseDto,
-  RegisterResponseDto,
-  UserResponseDto,
-} from './dto/server/auth.dto';
+import { LoginResponseDto, RegisterResponseDto } from './dto/server/auth.dto';
 import { getStorageItem, removeStorageItem, setStorageItem } from './storage';
 
 // Storage keys
@@ -131,67 +127,6 @@ class AuthService {
       // Ensure auth data is cleared even if there's an error
       await this.clearAuthData();
     }
-  }
-
-  // Refresh access token
-  async refreshToken(): Promise<string | null> {
-    try {
-      const response = await apiClient.post<LoginResponseDto>(
-        '/auth/refresh',
-        {}
-      );
-      this.accessToken = response.data.access_token;
-      await setStorageItem(ACCESS_TOKEN_KEY, this.accessToken);
-
-      return this.accessToken;
-    } catch (error) {
-      console.error('Token refresh error:', error);
-      await this.clearAuthData();
-      return null;
-    }
-  }
-
-  // Make authenticated API requests
-  async authenticatedRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    if (!this.accessToken) {
-      throw new Error('No access token available');
-    }
-
-    try {
-      return await apiClient.authenticatedRequest<T>(endpoint, options);
-    } catch (error: any) {
-      // Handle 401 Unauthorized
-      if (error.message?.includes('401')) {
-        const newToken = await this.refreshToken();
-        if (newToken) {
-          // Retry the request with new token
-          return await apiClient.authenticatedRequest<T>(endpoint, options);
-        } else {
-          // Refresh failed, logout user
-          await this.logout();
-          throw new Error('Authentication expired');
-        }
-      }
-      throw error;
-    }
-  }
-
-  // Get user profile (example authenticated request)
-  async getUserProfile(): Promise<UserResponseDto> {
-    return this.authenticatedRequest<UserResponseDto>('/auth/profile');
-  }
-
-  // Update user profile (example authenticated request)
-  async updateUserProfile(
-    data: Partial<UserResponseDto>
-  ): Promise<UserResponseDto> {
-    return this.authenticatedRequest<UserResponseDto>('/auth/profile', {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
   }
 
   // Store authentication data securely

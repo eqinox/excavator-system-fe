@@ -1,5 +1,4 @@
 import CategoryForm from '@/components/CategoryForm';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Center } from '@/components/ui/center';
 import { Heading } from '@/components/ui/heading';
@@ -82,9 +81,5 @@ export default function EditCategory() {
     id: category.id,
   };
 
-  return (
-    <ProtectedRoute>
-      <CategoryForm mode='edit' initialData={initialData} />
-    </ProtectedRoute>
-  );
+  return <CategoryForm mode='edit' initialData={initialData} />;
 }
