@@ -1,30 +1,26 @@
-import { Box } from '@/components/ui/box';
 import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { BASE_URL } from '@/constants';
-import { useEquipment } from '@/redux/useReduxHooks';
+// import { useEquipment } from '@/redux/useReduxHooks';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Image } from 'react-native';
 
 export default function Equipments() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const {
-    getEquipmentById,
-    equipmentLoading: loading,
-    equipmentError: error,
-    selectedEquipment,
-  } = useEquipment();
+  // const {
+  //   getEquipmentById,
+  //   equipmentLoading: loading,
+  //   equipmentError: error,
+  //   selectedEquipment,
+  // } = useEquipment();
 
   // Fetch equipment when component mounts or category ID changes
-  useEffect(() => {
-    if (id && typeof id === 'string') {
-      getEquipmentById(id);
-    }
-  }, [id]);
+  // useEffect(() => {
+  //   if (id && typeof id === 'string') {
+  //     getEquipmentById(id);
+  //   }
+  // }, [id]);
 
   const handleCreateEquipment = () => {
     router.push({
@@ -47,7 +43,7 @@ export default function Equipments() {
         </VStack>
 
         <VStack space='xl' className='w-full max-w-4xl'>
-          <VStack space='lg' className='w-full'>
+          {/* <VStack space='lg' className='w-full'>
             {loading && (
               <Text className='text-center text-lg font-medium'>
                 Зареждане...
@@ -93,7 +89,7 @@ export default function Equipments() {
                 Няма налично оборудване
               </Text>
             )}
-          </VStack>
+          </VStack> */}
         </VStack>
       </VStack>
     </VStack>

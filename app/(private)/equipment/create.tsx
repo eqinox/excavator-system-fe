@@ -1,4 +1,4 @@
-import EquipmentForm from '@/components/EquipmentForm';
+import EquipmentForm from '@/components/forms/EquipmentForm';
 import { useLocalSearchParams } from 'expo-router';
 
 export default function CreateEquipment() {

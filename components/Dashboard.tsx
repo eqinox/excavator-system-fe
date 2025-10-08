@@ -1,33 +1,26 @@
-import { Box } from '@/components/ui/box';
-import { Button } from '@/components/ui/button';
 import { Center } from '@/components/ui/center';
-import { Divider } from '@/components/ui/divider';
-import { Heading } from '@/components/ui/heading';
-import { HStack } from '@/components/ui/hstack';
-import { Text } from '@/components/ui/text';
-import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/redux/useReduxHooks';
+// import { useAuth } from '@/redux/useReduxHooks';
 import React from 'react';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  // const handleLogout = async () => {
+  //   try {
+  //     await logout();
+  //   } catch (error) {
+  //     console.error('Logout error:', error);
+  //   }
+  // };
 
-  // This component is only rendered when user is authenticated (protected route)
-  if (!user) {
-    return null;
-  }
+  // // This component is only rendered when user is authenticated (protected route)
+  // if (!user) {
+  //   return null;
+  // }
 
   return (
     <Center className='flex-1 px-4'>
-      <VStack space='xl' className='w-full max-w-sm'>
+      {/* <VStack space='xl' className='w-full max-w-sm'>
         <VStack space='md'>
           <Heading size='xl' className='text-center'>
             Добре дошли!
@@ -61,7 +54,7 @@ export default function Dashboard() {
             <Text>Излез от системата</Text>
           </Button>
         </VStack>
-      </VStack>
+      </VStack> */}
     </Center>
   );
 }

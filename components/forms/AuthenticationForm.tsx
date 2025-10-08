@@ -12,7 +12,6 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { useAuth } from '@/redux/useReduxHooks';
 import {
   loginSchema,
   signupSchema,
@@ -23,13 +22,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import '../../store';
+import { AppDispatch, RootState, login } from '../../store';
 
 export default function AuthenticationForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isLoading = useSelector((state: RootState) => state.auth.isLoading);
+  const error = useSelector((state: RootState) => state.auth.error);
   const params = useLocalSearchParams();
-  const { login, register, error: authError } = useAuth();
   const [isLogin, setIsLogin] = useState(params.mode !== 'signup');
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
   const {
     control,
@@ -45,7 +47,7 @@ export default function AuthenticationForm() {
       confirmPassword: '',
     },
   });
-
+  console.log('error', error);
   // Update form when mode changes
   useEffect(() => {
     const newMode = params.mode === 'signup' ? false : true;
@@ -53,28 +55,17 @@ export default function AuthenticationForm() {
     reset(); // Reset form when switching modes with default values
   }, [params.mode, reset]);
 
-  const onSubmit = async (data: LoginFormData | SignupFormData) => {
-    setIsSubmitting(true);
-    try {
-      if (isLogin) {
-        await login({
-          email: data.email,
-          password: data.password,
-        });
-      } else {
-        await register({
-          email: data.email,
-          password: data.password,
-          username: (data as SignupFormData).username || undefined,
-        });
-        setError(null);
-        // After successful registration, you might want to auto-login
-        // or show a success message
-      }
-    } catch (error: any) {
-      // setError(error.message || 'An error occurred');
-    } finally {
-      setIsSubmitting(false);
+  const onSubmit = (data: LoginFormData | SignupFormData) => {
+    if (isLogin) {
+      dispatch(login(data));
+    } else {
+      // await register({
+      //   email: data.email,
+      //   password: data.password,
+      //   username: (data as SignupFormData).username || undefined,
+      // });
+      // After successful registration, you might want to auto-login
+      // or show a success message
     }
   };
 
@@ -84,9 +75,9 @@ export default function AuthenticationForm() {
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
-    setError(null);
+    // setError(null);
   };
-  console.log('authError', authError);
+
   return (
     <Box className='min-h-screen flex-1 bg-background-100'>
       <Box className='py-safe flex-1 items-center justify-center px-4'>
@@ -109,12 +100,6 @@ export default function AuthenticationForm() {
               {error && (
                 <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
                   <Text className='text-sm text-error-600'>{error}</Text>
-                </Box>
-              )}
-
-              {authError && (
-                <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
-                  <Text className='text-sm text-error-600'>{authError}</Text>
                 </Box>
               )}
 
@@ -250,10 +235,10 @@ export default function AuthenticationForm() {
                 size='lg'
                 className='mt-4 bg-primary-500'
                 onPress={handleSubmit(onSubmit)}
-                isDisabled={isSubmitting}
+                isDisabled={isLoading}
               >
                 <ButtonText>
-                  {isSubmitting
+                  {isLoading
                     ? 'Обработване...'
                     : isLogin
                       ? 'Влизане'

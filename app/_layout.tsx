@@ -1,12 +1,10 @@
-import ReduxInitializer from '@/components/ReduxInitializer';
 import { Fab, FabIcon } from '@/components/ui/fab';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { MoonIcon, SunIcon } from '@/components/ui/icon';
 import { ThemeMode } from '@/constants';
 import '@/global.css';
 import { useTheme } from '@/hooks/useTheme';
-import { authService } from '@/lib/auth';
-import { store } from '@/redux/store';
+import { AppDispatch, initializeAuth, store } from '@/store';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import {
   DarkTheme,
@@ -19,7 +17,7 @@ import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -47,11 +45,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    async function fetchToken() {
-      await authService.initialize();
-      setIsLoading(false);
-    }
-    fetchToken();
+    setIsLoading(false);
   }, []);
 
   if (isLoading) {
@@ -61,9 +55,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <ReduxInitializer>
-          <RootLayoutNav />
-        </ReduxInitializer>
+        <RootLayoutNav />
       </Provider>
     </SafeAreaProvider>
   );
@@ -71,6 +63,12 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const { colorMode, handleThemeChange } = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    // Initialize auth state when the app starts
+    dispatch(initializeAuth());
+  }, [dispatch]);
 
   return (
     <GluestackUIProvider mode={colorMode}>

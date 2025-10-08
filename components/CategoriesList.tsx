@@ -8,23 +8,21 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Heading } from '@/components/ui/heading';
 import { HStack } from '@/components/ui/hstack';
-import { Pressable } from '@/components/ui/pressable';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { BASE_URL } from '@/constants';
-import { useAuth, useCategories } from '@/redux/useReduxHooks';
-import { Ionicons } from '@expo/vector-icons';
+// import { useAuth, useCategories } from '@/redux/useReduxHooks';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { AppDispatch, logout } from '../store';
 import { Button } from './ui/button';
 import { Toast, ToastTitle, useToast } from './ui/toast';
 
 export default function CategoriesList() {
   const router = useRouter();
   const toast = useToast();
-  const { user, logout } = useAuth();
-  const { deleteCategory, categories } = useCategories();
+  const dispatch = useDispatch<AppDispatch>();
+  // const { deleteCategory, categories } = useCategories();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
@@ -37,11 +35,7 @@ export default function CategoriesList() {
   };
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    dispatch(logout());
   };
 
   const handleAddCategory = () => {
@@ -119,7 +113,7 @@ export default function CategoriesList() {
           </HStack>
         </VStack>
 
-        <VStack space='lg' className='w-full'>
+        {/* <VStack space='lg' className='w-full'>
           <HStack space='md' className='flex-wrap justify-center'>
             {categories.map((category, index) => (
               <VStack key={index} space='sm' className='items-center'>
@@ -177,7 +171,7 @@ export default function CategoriesList() {
               </Button>
             )}
           </HStack>
-        </VStack>
+        </VStack> */}
       </VStack>
 
       {/* Delete Confirmation Dialog */}

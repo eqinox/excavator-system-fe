@@ -11,8 +11,8 @@ import { HStack } from '@/components/ui/hstack';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { apiClient } from '@/lib/api';
-import { useAuth } from '@/redux/useReduxHooks';
+// import { apiClient } from '@/lib/api';
+// import { useAuth } from '@/redux/useReduxHooks';
 import {
   equipmentSchema,
   type EquipmentFormData,
@@ -30,7 +30,7 @@ interface EquipmentFormProps {
 
 export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,71 +89,71 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
     return true;
   };
 
-  const onSubmit = async (data: EquipmentFormData) => {
-    if (!validateImages()) return;
+  // const onSubmit = async (data: EquipmentFormData) => {
+  //   if (!validateImages()) return;
 
-    setIsSubmitting(true);
-    setError(null);
+  //   setIsSubmitting(true);
+  //   setError(null);
 
-    try {
-      const formData = new FormData();
+  //   try {
+  //     const formData = new FormData();
 
-      // Add equipment data
-      formData.append('name', data.name);
-      formData.append('description', data.description);
-      formData.append('category_id', categoryId);
-      formData.append('price_per_day', data.price_per_day);
-      formData.append('location_id', data.location_id);
-      formData.append('available', data.available.toString());
-      if (user?.id) {
-        formData.append('owner', user.id);
-      }
+  //     // Add equipment data
+  //     formData.append('name', data.name);
+  //     formData.append('description', data.description);
+  //     formData.append('category_id', categoryId);
+  //     formData.append('price_per_day', data.price_per_day);
+  //     formData.append('location_id', data.location_id);
+  //     formData.append('available', data.available.toString());
+  //     // if (user?.id) {
+  //     //   formData.append('owner', user.id);
+  //     // }
 
-      // Process images the same way as CategoryForm
-      if (selectedImages && selectedImages.length > 0) {
-        selectedImages.forEach((img: any) => {
-          let base64Image: string | null = null;
+  //     // Process images the same way as CategoryForm
+  //     if (selectedImages && selectedImages.length > 0) {
+  //       selectedImages.forEach((img: any) => {
+  //         let base64Image: string | null = null;
 
-          if (img && typeof img === 'object' && img.base64) {
-            base64Image = img.base64 as string;
-          } else if (
-            img &&
-            typeof img === 'object' &&
-            typeof img.uri === 'string' &&
-            img.uri.startsWith('data:')
-          ) {
-            const commaIndex = img.uri.indexOf(',');
-            if (commaIndex !== -1)
-              base64Image = img.uri.substring(commaIndex + 1);
-          } else if (typeof img === 'string' && img.startsWith('data:')) {
-            const commaIndex = img.indexOf(',');
-            if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
-          }
+  //         if (img && typeof img === 'object' && img.base64) {
+  //           base64Image = img.base64 as string;
+  //         } else if (
+  //           img &&
+  //           typeof img === 'object' &&
+  //           typeof img.uri === 'string' &&
+  //           img.uri.startsWith('data:')
+  //         ) {
+  //           const commaIndex = img.uri.indexOf(',');
+  //           if (commaIndex !== -1)
+  //             base64Image = img.uri.substring(commaIndex + 1);
+  //         } else if (typeof img === 'string' && img.startsWith('data:')) {
+  //           const commaIndex = img.indexOf(',');
+  //           if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
+  //         }
 
-          if (base64Image) {
-            formData.append('images', base64Image);
-          }
-        });
-      }
+  //         if (base64Image) {
+  //           formData.append('images', base64Image);
+  //         }
+  //       });
+  //     }
 
-      await apiClient.authenticatedRequest('/equipment', {
-        method: 'POST',
-        body: formData,
-      });
+  //     await apiClient.authenticatedRequest('/equipment', {
+  //       method: 'POST',
+  //       body: formData,
+  //     });
 
-      Alert.alert('Успех', 'Оборудването е създадено успешно!', [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]);
-    } catch (error: any) {
-      console.error('Failed to create equipment:', error);
-      setError(error.message || 'Неуспешно създаване на оборудване');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  //     Alert.alert('Успех', 'Оборудването е създадено успешно!', [
+  //       {
+  //         text: 'OK',
+  //         onPress: () => router.back(),
+  //       },
+  //     ]);
+  //   } catch (error: any) {
+  //     console.error('Failed to create equipment:', error);
+  //     setError(error.message || 'Неуспешно създаване на оборудване');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   // Type-safe error access
   const getFieldError = (fieldName: string) => {
@@ -262,7 +262,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
           </FormControl>
 
           {/* Location Field */}
-          <FormControl isInvalid={!!getFieldError('location_id')}>
+          {/* <FormControl isInvalid={!!getFieldError('location_id')}>
             <FormControlLabel>
               <FormControlLabelText>Локация *</FormControlLabelText>
             </FormControlLabel>
@@ -287,7 +287,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                 {getFieldError('location_id')}
               </FormControlErrorText>
             </FormControlError>
-          </FormControl>
+          </FormControl> */}
 
           {/* Images Field */}
           <FormControl isInvalid={selectedImages.length === 0}>
@@ -364,7 +364,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
           </FormControl>
         </VStack>
 
-        <VStack space='md'>
+        {/* <VStack space='md'>
           <Button
             onPress={handleSubmit(onSubmit)}
             action='primary'
@@ -391,7 +391,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
           >
             <ButtonText>Отказ</ButtonText>
           </Button>
-        </VStack>
+        </VStack> */}
       </VStack>
     </ScrollView>
   );

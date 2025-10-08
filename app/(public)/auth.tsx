@@ -1,13 +1,16 @@
-import AuthenticationForm from '@/components/AuthenticationForm';
+import AuthenticationForm from '@/components/forms/AuthenticationForm';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
-import { useAuth } from '@/redux/useReduxHooks';
+import { AppState } from '@/store';
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 export default function AuthScreen() {
-  const { isAuthenticated } = useAuth();
   const router = useRouter();
+  const isAuthenticated = useSelector((state: AppState) => {
+    return state.auth.isAuthenticated;
+  });
 
   useEffect(() => {
     if (isAuthenticated) {

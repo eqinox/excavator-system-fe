@@ -1,23 +1,18 @@
-import { Center } from '@/components/ui/center';
-import { Text } from '@/components/ui/text';
-import { useAuth } from '@/redux/useReduxHooks';
+// import { useAuth } from '@/redux/useReduxHooks';
+import { AppState } from '@/store';
 import { Redirect, Slot } from 'expo-router';
 import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 export default function PrivateLayout() {
-  const { loading: isLoading, isAuthenticated } = useAuth();
+  // const { loading: isLoading, isAuthenticated } = useAuth();
+  const isAuthenticated = useSelector((state: AppState) => {
+    return state.auth.isAuthenticated;
+  });
 
   useEffect(() => {
     // This effect will trigger re-renders when auth state changes
-  }, [isAuthenticated, isLoading]);
-
-  if (isLoading) {
-    return (
-      <Center className='flex-1'>
-        <Text>Зареждане...</Text>
-      </Center>
-    );
-  }
+  }, [isAuthenticated]);
 
   if (!isAuthenticated) {
     // If not authenticated, redirect to auth screen
