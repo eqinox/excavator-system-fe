@@ -1,19 +1,19 @@
 'use client';
-import React from 'react';
 import { createToastHook } from '@gluestack-ui-nightly/core/toast/creator';
-import { AccessibilityInfo, Text, View, ViewStyle } from 'react-native';
-import { tva } from '@gluestack-ui-nightly/utils/nativewind-utils';
-import { cssInterop } from 'nativewind';
+import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
 import {
-  Motion,
+  tva,
+  useStyleContext,
+  withStyleContext,
+} from '@gluestack-ui-nightly/utils/nativewind-utils';
+import {
   AnimatePresence,
+  Motion,
   MotionComponentProps,
 } from '@legendapp/motion';
-import {
-  withStyleContext,
-  useStyleContext,
-} from '@gluestack-ui-nightly/utils/nativewind-utils';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import { cssInterop } from 'nativewind';
+import React from 'react';
+import { AccessibilityInfo, Text, View, ViewStyle } from 'react-native';
 
 type IMotionViewProps = React.ComponentProps<typeof View> &
   MotionComponentProps<typeof View, ViewStyle, unknown, unknown, unknown>;
@@ -60,11 +60,11 @@ const toastTitleStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -131,11 +131,11 @@ const toastDescriptionStyle = tva({
     },
     size: {
       '2xs': 'text-2xs',
-      'xs': 'text-xs',
-      'sm': 'text-sm',
-      'md': 'text-base',
-      'lg': 'text-lg',
-      'xl': 'text-xl',
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+      xl: 'text-xl',
       '2xl': 'text-2xl',
       '3xl': 'text-3xl',
       '4xl': 'text-4xl',
@@ -192,9 +192,9 @@ const ToastTitle = React.forwardRef<
     <Text
       {...props}
       ref={ref}
-      aria-live="assertive"
-      aria-atomic="true"
-      role="alert"
+      aria-live='assertive'
+      aria-atomic='true'
+      role='alert'
       className={toastTitleStyle({
         size,
         class: className,
@@ -237,4 +237,4 @@ Toast.displayName = 'Toast';
 ToastTitle.displayName = 'ToastTitle';
 ToastDescription.displayName = 'ToastDescription';
 
-export { useToast, Toast, ToastTitle, ToastDescription };
+export { Toast, ToastDescription, ToastTitle, useToast };

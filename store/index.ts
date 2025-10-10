@@ -1,17 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { apiSlice } from './slices/apiSlice';
-import { AuthState, authReducer } from './slices/authSlice';
+import { authReducer } from './slices/authSlice';
+import { categoriesReducer } from './slices/categoriesSlice';
 
-export interface AppState {
-  auth: AuthState;
-  [apiSlice.reducerPath]: ReturnType<typeof apiSlice.reducer>;
-}
-
-export type RootState = AppState;
+export type RootState = ReturnType<typeof store.getState>;
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
+    categories: categoriesReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: getDefaultMiddleware =>
@@ -20,5 +17,6 @@ const store = configureStore({
 
 export * from './slices/authSlice';
 export * from './thunks/fetchAuthentication';
+export * from './thunks/fetchCategories';
 export { store };
 export type AppDispatch = typeof store.dispatch;

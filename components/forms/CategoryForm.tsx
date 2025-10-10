@@ -11,6 +11,7 @@ import {
 import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import { AppDispatch, RootState, createCategory, editCategory } from '@/store';
 // import { useCategories } from '@/redux/useReduxHooks';
 import {
   categoryCreateSchema,
@@ -22,8 +23,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { Image } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { Input, InputField } from '../ui/input';
+import { Toast, ToastTitle, useToast } from '../ui/toast';
 
 interface CategoryFormProps {
   mode?: 'create' | 'edit';
@@ -34,8 +38,13 @@ export default function CategoryForm({
   mode = 'create',
   initialData,
 }: CategoryFormProps) {
+  const dispatch = useDispatch<AppDispatch>();
   const params = useLocalSearchParams();
   const router = useRouter();
+  const toast = useToast();
+  const isLoading = useSelector(
+    (state: RootState) => state.categories.isLoading
+  );
   // const {
   //   addCategory,
   //   editCategory,
@@ -98,67 +107,94 @@ export default function CategoryForm({
     }
   };
 
-  // const onSubmit = async (data: CategoryUpdateData | CategoryCreateData) => {
-  //   try {
-  //     if (isEditMode) {
-  //       const updateData = data as CategoryUpdateData;
+  const onSubmit = async (data: CategoryUpdateData | CategoryCreateData) => {
+    if (isEditMode) {
+      const updateData = data as CategoryUpdateData;
 
-  //       const img: any = (updateData as any).image;
-  //       const payload: any = { name: updateData.name };
+      const img: any = (updateData as any).image;
+      const payload: any = { name: updateData.name };
 
-  //       if (img) {
-  //         if (typeof img === 'object' && img.base64) {
-  //           payload.image = img.base64 as string;
-  //         } else if (
-  //           typeof img === 'object' &&
-  //           typeof img.uri === 'string' &&
-  //           img.uri.startsWith('data:')
-  //         ) {
-  //           const commaIndex = img.uri.indexOf(',');
-  //           if (commaIndex !== -1)
-  //             payload.image = img.uri.substring(commaIndex + 1);
-  //         } else if (typeof img === 'string' && img.startsWith('data:')) {
-  //           const commaIndex = img.indexOf(',');
-  //           if (commaIndex !== -1)
-  //             payload.image = img.substring(commaIndex + 1);
-  //         }
-  //       }
+      if (img) {
+        if (typeof img === 'object' && img.base64) {
+          payload.image = img.base64 as string;
+        } else if (
+          typeof img === 'object' &&
+          typeof img.uri === 'string' &&
+          img.uri.startsWith('data:')
+        ) {
+          const commaIndex = img.uri.indexOf(',');
+          if (commaIndex !== -1)
+            payload.image = img.uri.substring(commaIndex + 1);
+        } else if (typeof img === 'string' && img.startsWith('data:')) {
+          const commaIndex = img.indexOf(',');
+          if (commaIndex !== -1) payload.image = img.substring(commaIndex + 1);
+        }
+      }
 
-  //       await editCategory(updateData.id, payload);
-  //     } else {
-  //       const createdCategory = data as CategoryCreateData;
-  //       const img: any = (createdCategory as any).image;
+      dispatch(
+        editCategory({
+          data: updateData,
+          onSuccess: (message: string) => {
+            toast.show({
+              placement: 'top',
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action='success' variant='solid'>
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+            reset();
+            router.replace('/categories');
+          },
+          onError: (message: string) => {
+            toast.show({
+              placement: 'top',
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action='error' variant='solid'>
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+          },
+        })
+      );
+    } else {
+      const createdCategory = data as CategoryCreateData;
+      createdCategory.image = createdCategory.image.uri;
 
-  //       let base64Image: string | null = null;
-  //       if (img && typeof img === 'object' && img.base64) {
-  //         base64Image = img.base64 as string;
-  //       } else if (
-  //         img &&
-  //         typeof img === 'object' &&
-  //         typeof img.uri === 'string' &&
-  //         img.uri.startsWith('data:')
-  //       ) {
-  //         const commaIndex = img.uri.indexOf(',');
-  //         if (commaIndex !== -1)
-  //           base64Image = img.uri.substring(commaIndex + 1);
-  //       } else if (typeof img === 'string' && img.startsWith('data:')) {
-  //         const commaIndex = img.indexOf(',');
-  //         if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
-  //       }
-
-  //       const result = await addCategory({
-  //         name: createdCategory.name,
-  //         image: base64Image || '',
-  //       });
-  //     }
-
-  //     router.replace('/categories');
-  //     reset();
-  //   } catch (error: any) {
-  //     console.log('❌ Error caught:', error);
-  //     console.log('❌ Error message:', error.message);
-  //   }
-  // };
+      dispatch(
+        createCategory({
+          data: createdCategory,
+          onSuccess: (message: string) => {
+            toast.show({
+              placement: 'top',
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action='success' variant='solid'>
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+            reset();
+            router.replace('/categories');
+          },
+          onError: (message: string) => {
+            toast.show({
+              placement: 'top',
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action='error' variant='solid'>
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+          },
+        })
+      );
+    }
+  };
 
   const getFieldError = (fieldName: string) => {
     return (errors as any)[fieldName]?.message;
@@ -184,17 +220,8 @@ export default function CategoryForm({
             </Box>
 
             <VStack space='md' className='w-full'>
-              {/* Global error message */}
-              {/* {categoriesError && (
-                <Box className='rounded-md border border-error-200 bg-error-50 p-3'>
-                  <Text className='text-sm text-error-600'>
-                    {categoriesError}
-                  </Text>
-                </Box>
-              )} */}
-
               {/* Category Name Field */}
-              {/* <FormControl isInvalid={!!getFieldError('name')}>
+              <FormControl isInvalid={!!getFieldError('name')}>
                 <FormControlLabel>
                   <FormControlLabelText>
                     Име на категорията
@@ -223,7 +250,7 @@ export default function CategoryForm({
                     </FormControlErrorText>
                   </FormControlError>
                 )}
-              </FormControl> */}
+              </FormControl>
 
               {/* Image Upload Field */}
               <FormControl isInvalid={!!getFieldError('image')}>
@@ -272,20 +299,20 @@ export default function CategoryForm({
               </FormControl>
 
               {/* Submit Button */}
-              {/* <Button
+              <Button
                 size='lg'
                 className='mt-4 bg-primary-500'
                 onPress={handleSubmit(onSubmit)}
-                isDisabled={categoriesLoading}
+                isDisabled={isLoading}
               >
                 <ButtonText>
-                  {categoriesLoading
+                  {isLoading
                     ? 'Обработване...'
                     : isEditMode
                       ? 'Запази промените'
                       : 'Създай категория'}
                 </ButtonText>
-              </Button> */}
+              </Button>
             </VStack>
 
             {/* Back Button */}

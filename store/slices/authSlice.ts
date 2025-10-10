@@ -1,3 +1,4 @@
+import { UserDto } from '@/dto/client/auth.dto';
 import { createSlice } from '@reduxjs/toolkit';
 import { initializeAuth, login, logout } from '../thunks/fetchAuthentication';
 
@@ -6,6 +7,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  user: UserDto | null;
 }
 
 const initialState: AuthState = {
@@ -13,6 +15,7 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  user: null,
 };
 
 const authSlice = createSlice({
@@ -20,6 +23,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, action) => {
+      console.log('in auth setCredentials', action.payload);
       state.token = action.payload;
       state.isAuthenticated = true;
       state.error = null;
@@ -34,7 +38,9 @@ const authSlice = createSlice({
     builder.addCase(initializeAuth.fulfilled, (state, action) => {
       state.isLoading = false;
       state.isAuthenticated = true;
-      state.token = action.payload;
+      console.log('in auth filfilled', action.payload);
+      state.token = action.payload?.access_token || null;
+      state.user = action.payload?.user || null;
     });
     builder.addCase(initializeAuth.rejected, (state, action) => {
       state.isLoading = false;
@@ -53,7 +59,8 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isAuthenticated = true;
       state.error = null;
-      state.token = action.payload;
+      state.token = action.payload.access_token;
+      state.user = action.payload.user;
     });
     builder.addCase(login.rejected, (state, action) => {
       console.log('login rejected', action);

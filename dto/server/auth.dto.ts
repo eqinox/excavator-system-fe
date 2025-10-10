@@ -14,11 +14,7 @@ export interface RegisterResponseDataDto {
 // The Data of the response
 export interface LoginResponseDataDto {
   access_token: string;
-  // user: UserDto;
-}
-
-export interface RefreshTokenResponseDataDto {
-  access_token: string;
+  user: UserDto;
 }
 
 // Response DTOs that extend CommonResponse
@@ -31,4 +27,4 @@ export interface LoginResponseDto
   extends CommonResponse<LoginResponseDataDto> {}
 
 export interface RefreshTokenResponseDto
-  extends CommonResponse<RefreshTokenResponseDataDto> {}
+  extends CommonResponse<LoginResponseDataDto> {}

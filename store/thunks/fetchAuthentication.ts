@@ -23,13 +23,13 @@ const login = createAsyncThunk(
     // This assertion function will throw if there's an error, otherwise TypeScript knows result is { data: LoginResponseDto }
     assertNoError(result, 'An error occurred during login');
 
-    return result.data.data.access_token;
+    return result.data.data;
   }
 );
 
 const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
   const result = (await dispatch(
-    apiSlice.endpoints.get.initiate('/auth/logout')
+    apiSlice.endpoints.authenticatedGet.initiate('/auth/logout')
   )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
 
   // This assertion function will throw if there's an error, otherwise TypeScript knows result is { data: any }
@@ -49,8 +49,12 @@ export const initializeAuth = createAsyncThunk(
       )) as { data: RefreshTokenResponseDto } | { error: FetchBaseQueryError };
 
       assertNoError(result, 'An error occurred during initialize auth');
-      console.log('initializeAuth result', result);
-      return result.data.data.access_token;
+
+      if (result.data.statusCode >= 200 || result.data.statusCode < 300) {
+        return result.data.data;
+      } else {
+        throw new Error(result.data.message);
+      }
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       throw error;

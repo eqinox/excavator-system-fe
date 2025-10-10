@@ -11,11 +11,14 @@ import { HStack } from '@/components/ui/hstack';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 // import { useAuth, useCategories } from '@/redux/useReduxHooks';
+import { BASE_URL } from '@/constants';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { AppDispatch, logout } from '../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState, deleteCategory, logout } from '../store';
 import { Button } from './ui/button';
+import { Image } from './ui/image';
+import { Pressable } from './ui/pressable';
 import { Toast, ToastTitle, useToast } from './ui/toast';
 
 export default function CategoriesList() {
@@ -23,6 +26,11 @@ export default function CategoriesList() {
   const toast = useToast();
   const dispatch = useDispatch<AppDispatch>();
   // const { deleteCategory, categories } = useCategories();
+
+  const user = useSelector((state: RootState) => state.auth.user);
+  const categories = useSelector(
+    (state: RootState) => state.categories.categories
+  );
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
@@ -57,41 +65,34 @@ export default function CategoriesList() {
   const confirmDeleteCategory = async () => {
     if (!categoryToDelete) return;
 
-    try {
-      await deleteCategory(categoryToDelete);
-
-      toast.show({
-        placement: 'top',
-        duration: 3000,
-        render: ({ id }) => {
-          return (
-            <Toast action='muted' variant='solid'>
-              <ToastTitle>Category deleted successfully</ToastTitle>
-            </Toast>
-          );
+    dispatch(
+      deleteCategory({
+        categoryId: categoryToDelete,
+        onSuccess: (message: string) => {
+          toast.show({
+            placement: 'top',
+            duration: 3000,
+            render: ({ id }) => (
+              <Toast action='success' variant='solid'>
+                <ToastTitle>{message}</ToastTitle>
+              </Toast>
+            ),
+          });
+          cancelDeleteCategory();
         },
-      });
-    } catch (error) {
-      console.error('Failed to remove category:', error);
-      toast.show({
-        placement: 'top',
-        duration: 3000,
-        render: ({ id }) => {
-          return (
-            <Toast action='muted' variant='solid'>
-              <ToastTitle>
-                {error instanceof Error
-                  ? error.message
-                  : 'Failed to remove category'}
-              </ToastTitle>
-            </Toast>
-          );
+        onError: (message: string) => {
+          toast.show({
+            placement: 'top',
+            duration: 3000,
+            render: ({ id }) => (
+              <Toast action='error' variant='solid'>
+                <ToastTitle>{message}</ToastTitle>
+              </Toast>
+            ),
+          });
         },
-      });
-    } finally {
-      setShowDeleteDialog(false);
-      setCategoryToDelete(null);
-    }
+      })
+    );
   };
 
   const cancelDeleteCategory = () => {
@@ -113,7 +114,7 @@ export default function CategoriesList() {
           </HStack>
         </VStack>
 
-        {/* <VStack space='lg' className='w-full'>
+        <VStack space='lg' className='w-full'>
           <HStack space='md' className='flex-wrap justify-center'>
             {categories.map((category, index) => (
               <VStack key={index} space='sm' className='items-center'>
@@ -139,7 +140,8 @@ export default function CategoriesList() {
                       onPress={() => handleEditCategory(category.id)}
                       className='bg-yellow-500 p-2'
                     >
-                      <Ionicons name='create-outline' size={16} color='white' />
+                      {/* Edit */}
+                      {/* <Ionicons name='create-outline' size={16} color='white' /> */}
                     </Button>
                     <Button
                       variant='ghost'
@@ -147,7 +149,8 @@ export default function CategoriesList() {
                       onPress={() => handleRemoveCategory(category.id)}
                       className='bg-red-500 p-2 text-white'
                     >
-                      <Ionicons name='trash-outline' size={16} color='white' />
+                      {/* Remove */}
+                      {/* <Ionicons name='trash-outline' size={16} color='white' /> */}
                     </Button>
                   </HStack>
                 )}
@@ -171,7 +174,7 @@ export default function CategoriesList() {
               </Button>
             )}
           </HStack>
-        </VStack> */}
+        </VStack>
       </VStack>
 
       {/* Delete Confirmation Dialog */}

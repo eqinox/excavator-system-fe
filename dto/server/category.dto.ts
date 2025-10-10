@@ -11,6 +11,13 @@ export interface CategoryResponseDataDto {
   };
 }
 
+interface CategoryDeleteResponseDataDto {
+  message: string;
+}
+
+export interface CategoryDeleteResponseDto
+  extends CommonResponse<CategoryDeleteResponseDataDto> {}
+
 export interface CategoryResponseDto
   extends CommonResponse<CategoryResponseDataDto> {}
 

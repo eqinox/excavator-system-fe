@@ -1,6 +1,5 @@
 import { BASE_URL } from '@/constants';
 import { CommonResponse } from '@/dto/common.dto';
-import { RefreshTokenResponseDto } from '@/dto/server/auth.dto';
 import {
   BaseQueryFn,
   FetchArgs,
@@ -41,14 +40,12 @@ export const baseQueryWithReauth: BaseQueryFn<
       api,
       extraOptions
     );
+
     if (refreshResult.data) {
       api.dispatch(setCredentials(refreshResult.data));
     } else {
       api.dispatch(logout());
     }
-  } else if (result.data) {
-    let data = result.data as RefreshTokenResponseDto;
-    api.dispatch(setCredentials(data.data.access_token));
   }
 
   return result;
@@ -107,7 +104,7 @@ export const apiSlice = createApi({
       query: ({ url, data }) => ({
         url,
         method: 'POST',
-        body: data,
+        body: JSON.stringify(data),
       }),
       invalidatesTags: (result, error, { url }) => {
         if (url.includes('/categories'))
