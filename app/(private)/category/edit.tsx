@@ -2,39 +2,35 @@ import CategoryForm from '@/components/forms/CategoryForm';
 import { Center } from '@/components/ui/center';
 import { Text } from '@/components/ui/text';
 import { BASE_URL } from '@/constants';
-// import { findCategoryById } from '@/lib/categories';
-import { CategoryResponseDataDto } from '@/dto/server/category.dto';
-// import { useAuth } from '@/redux/useReduxHooks';
+import { AppDispatch, RootState } from '@/store';
+import { findCategoryById } from '@/store/thunks/fetchCategories';
 import { CategoryUpdateData } from '@/validation/category';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function EditCategory() {
   const router = useRouter();
-  // const { user } = useAuth();
+  const dispatch = useDispatch<AppDispatch>();
   const params = useLocalSearchParams();
-  const [category, setCategory] = useState<CategoryResponseDataDto | null>(
-    null
+  const category = useSelector(
+    (state: RootState) => state.categories.selectedCategory
   );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Get category data from params (you might want to fetch this from API)
   const categoryId = params.id as string;
 
-  // useEffect(() => {
-  //   const fetchCategory = async () => {
-  //     try {
-  //       const category = await findCategoryById(categoryId);
-  //       setCategory(category.data);
-  //     } catch (error) {
-  //       setError(error instanceof Error ? error.message : 'Unknown error');
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchCategory();
-  // }, []);
+  useEffect(() => {
+    const loadCategory = async () => {
+      setLoading(true);
+      await dispatch(findCategoryById(categoryId));
+      setLoading(false);
+    };
+    loadCategory();
+  }, [dispatch, categoryId]);
 
   if (loading) {
     return (

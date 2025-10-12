@@ -161,12 +161,31 @@ export default function CategoryForm({
         })
       );
     } else {
+      // const createdCategory = data as CategoryCreateData;
+      // createdCategory.image = createdCategory.image.uri;
+
       const createdCategory = data as CategoryCreateData;
-      createdCategory.image = createdCategory.image.uri;
+      const img: any = (createdCategory as any).image;
+
+      let base64Image: string | null = null;
+      if (img && typeof img === 'object' && img.base64) {
+        base64Image = img.base64 as string;
+      } else if (
+        img &&
+        typeof img === 'object' &&
+        typeof img.uri === 'string' &&
+        img.uri.startsWith('data:')
+      ) {
+        const commaIndex = img.uri.indexOf(',');
+        if (commaIndex !== -1) base64Image = img.uri.substring(commaIndex + 1);
+      } else if (typeof img === 'string' && img.startsWith('data:')) {
+        const commaIndex = img.indexOf(',');
+        if (commaIndex !== -1) base64Image = img.substring(commaIndex + 1);
+      }
 
       dispatch(
         createCategory({
-          data: createdCategory,
+          data: { ...createdCategory, image: base64Image },
           onSuccess: (message: string) => {
             toast.show({
               placement: 'top',

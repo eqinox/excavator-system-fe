@@ -155,4 +155,27 @@ const deleteCategory = createAsyncThunk(
   }
 );
 
-export { createCategory, deleteCategory, editCategory, fetchCategories };
+const findCategoryById = createAsyncThunk(
+  'categories/findById',
+  async (categoryId: string, { dispatch }) => {
+    const result = (await dispatch(
+      apiSlice.endpoints.authenticatedGet.initiate(`/categories/${categoryId}`)
+    )) as { data: CategoryResponseDto } | { error: FetchBaseQueryError };
+
+    assertNoError(result, 'Възникна грешка при намиране на категория');
+
+    if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
+      return result.data.data;
+    } else {
+      throw new Error(result.data.message);
+    }
+  }
+);
+
+export {
+  createCategory,
+  deleteCategory,
+  editCategory,
+  fetchCategories,
+  findCategoryById,
+};

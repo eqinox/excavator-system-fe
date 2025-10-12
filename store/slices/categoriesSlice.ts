@@ -5,6 +5,7 @@ import {
   deleteCategory,
   editCategory,
   fetchCategories,
+  findCategoryById,
 } from '../thunks/fetchCategories';
 
 export interface CategoriesState {
@@ -100,6 +101,23 @@ export const categoriesSlice = createSlice({
     builder.addCase(deleteCategory.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || 'Failed to delete category';
+      state.message = '';
+    });
+
+    // Find category by id
+    builder.addCase(findCategoryById.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+      state.message = '';
+    });
+    builder.addCase(findCategoryById.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.selectedCategory = action.payload;
+      state.error = null;
+    });
+    builder.addCase(findCategoryById.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || 'Failed to find category by id';
       state.message = '';
     });
   },
