@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { HStack } from '@/components/ui/hstack';
-import { Text } from '@/components/ui/text';
-import { VStack } from '@/components/ui/vstack';
+import { Button } from "@/components/ui/button";
+import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
 // import { useEquipment } from '@/redux/useReduxHooks';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function Equipments() {
   const { id } = useLocalSearchParams();
@@ -23,26 +23,26 @@ export default function Equipments() {
   // }, [id]);
 
   const handleCreateEquipment = () => {
-    router.push({
-      pathname: '/equipment/create',
-      params: {
-        categoryId: id,
-      },
-    });
+    // router.push({
+    //   pathname: '/equipment/create',
+    //   params: {
+    //     categoryId: id,
+    //   },
+    // });
   };
 
   return (
-    <VStack className='flex-1 justify-start bg-background-300 px-4'>
-      <VStack space='xl' className='w-full max-w-4xl'>
-        <VStack space='md' className='mb-4 mt-4'>
-          <HStack className='justify-end'>
-            <Button variant='outline' onPress={() => handleCreateEquipment()}>
+    <VStack className="flex-1 justify-start bg-background-300 px-4">
+      <VStack space="xl" className="w-full max-w-4xl">
+        <VStack space="md" className="mb-4 mt-4">
+          <HStack className="justify-end">
+            <Button variant="outline" onPress={() => handleCreateEquipment()}>
               <Text>Публикувай оборудване</Text>
             </Button>
           </HStack>
         </VStack>
 
-        <VStack space='xl' className='w-full max-w-4xl'>
+        <VStack space="xl" className="w-full max-w-4xl">
           {/* <VStack space='lg' className='w-full'>
             {loading && (
               <Text className='text-center text-lg font-medium'>

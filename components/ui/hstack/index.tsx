@@ -1,5 +1,5 @@
 import React from 'react';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { View } from 'react-native';
 import type { ViewProps } from 'react-native';
 import { hstackStyle } from './styles';
@@ -11,7 +11,7 @@ const HStack = React.forwardRef<React.ComponentRef<typeof View>, IHStackProps>(
     return (
       <View
         className={hstackStyle({
-          space: space as any,
+          space,
           reversed: reversed as boolean,
           class: className,
         })}

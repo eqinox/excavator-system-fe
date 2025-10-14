@@ -7,7 +7,7 @@ export default function PublicIndex() {
   const isAuthenticated = useSelector((state: RootState) => {
     return state.auth.isAuthenticated;
   });
-
+  
   if (isAuthenticated) {
     return <Redirect href='/(private)/categories' />;
   }

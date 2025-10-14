@@ -1,15 +1,15 @@
 'use client';
 import React from 'react';
-import { createRadio } from '@gluestack-ui-nightly/core/radio/creator';
+import { createRadio } from '@gluestack-ui/core/radio/creator';
 import { Pressable, View, Platform, Text } from 'react-native';
-import { tva } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {
   withStyleContext,
   useStyleContext,
-} from '@gluestack-ui-nightly/utils/nativewind-utils';
+} from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
-import { PrimitiveIcon, UIIcon } from '@gluestack-ui-nightly/core/icon/creator';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
 
 const SCOPE = 'Radio';
 
@@ -203,7 +203,7 @@ const RadioIcon = React.forwardRef<
         parentVariants: {
           size: parentSize,
         },
-        size: size as any,
+        size,
         class: className,
       })}
       ref={ref}

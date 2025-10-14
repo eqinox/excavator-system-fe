@@ -1,6 +1,6 @@
-import { UserDto } from '@/dto/client/auth.dto';
-import { createSlice } from '@reduxjs/toolkit';
-import { initializeAuth, login, logout } from '../thunks/fetchAuthentication';
+import { UserDto } from "@/dto/client/auth.dto";
+import { createSlice } from "@reduxjs/toolkit";
+import { initializeAuth, login, logout } from "../thunks/fetchAuthentication";
 
 export interface AuthState {
   token: string | null;
@@ -19,26 +19,29 @@ const initialState: AuthState = {
 };
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setCredentials: (state, action) => {
-      console.log('in auth setCredentials', action.payload);
       state.token = action.payload;
       state.isAuthenticated = true;
       state.error = null;
     },
+    logoutAction: (state) => {
+      state.token = null;
+      state.isAuthenticated = false;
+      state.error = null;
+    },
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     // Initialize auth cases
-    builder.addCase(initializeAuth.pending, state => {
+    builder.addCase(initializeAuth.pending, (state) => {
       state.isLoading = true;
       state.error = null;
     });
     builder.addCase(initializeAuth.fulfilled, (state, action) => {
       state.isLoading = false;
       state.isAuthenticated = true;
-      console.log('in auth filfilled', action.payload);
       state.token = action.payload?.access_token || null;
       state.user = action.payload?.user || null;
     });
@@ -51,7 +54,7 @@ const authSlice = createSlice({
     });
 
     // Login cases
-    builder.addCase(login.pending, state => {
+    builder.addCase(login.pending, (state) => {
       state.isLoading = true;
       state.error = null;
     });
@@ -63,18 +66,17 @@ const authSlice = createSlice({
       state.user = action.payload.user;
     });
     builder.addCase(login.rejected, (state, action) => {
-      console.log('login rejected', action);
       state.isLoading = false;
       state.isAuthenticated = false;
-      state.error = action.error.message || 'Login failed';
+      state.error = action.error.message || "Login failed";
     });
 
     // Logout cases
-    builder.addCase(logout.pending, state => {
+    builder.addCase(logout.pending, (state) => {
       state.isLoading = true;
       state.error = null;
     });
-    builder.addCase(logout.fulfilled, state => {
+    builder.addCase(logout.fulfilled, (state) => {
       state.isLoading = false;
       state.isAuthenticated = false;
       state.token = null;
@@ -83,7 +85,7 @@ const authSlice = createSlice({
     builder.addCase(logout.rejected, (state, action) => {
       state.isLoading = false;
       state.isAuthenticated = false;
-      state.error = action.error.message || 'Logout failed';
+      state.error = action.error.message || "Logout failed";
     });
   },
 });

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import { createMenu } from '@gluestack-ui-nightly/core/menu/creator';
-import { tva } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import { createMenu } from '@gluestack-ui/core/menu/creator';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import { Pressable, Text, View, ViewStyle } from 'react-native';
 import {
@@ -9,7 +9,7 @@ import {
   AnimatePresence,
   MotionComponentProps,
 } from '@legendapp/motion';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 
 type IMotionViewProps = React.ComponentProps<typeof View> &
   MotionComponentProps<typeof View, ViewStyle, unknown, unknown, unknown>;
@@ -197,7 +197,7 @@ const MenuItemLabel = React.forwardRef<
         bold: bold as boolean,
         underline: underline as boolean,
         strikeThrough: strikeThrough as boolean,
-        size: size as any,
+        size,
         sub: sub as boolean,
         italic: italic as boolean,
         highlight: highlight as boolean,

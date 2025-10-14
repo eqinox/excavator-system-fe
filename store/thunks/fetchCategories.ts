@@ -86,8 +86,8 @@ const editCategory = createAsyncThunk(
   ) => {
     try {
       const result = (await dispatch(
-        apiSlice.endpoints.authenticatedPut.initiate({
-          url: '/categories',
+        apiSlice.endpoints.authenticatedPatch.initiate({
+          url: `/categories/${data.id}`,
           data: data,
         })
       )) as { data: CategoryResponseDto } | { error: FetchBaseQueryError };

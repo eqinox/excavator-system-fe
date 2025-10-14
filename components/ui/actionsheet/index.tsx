@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { H4 } from '@expo/html-elements';
-import { createActionsheet } from '@gluestack-ui-nightly/core/actionsheet/creator';
+import { createActionsheet } from '@gluestack-ui/core/actionsheet/creator';
 import {
   Pressable,
   View,
@@ -13,9 +13,9 @@ import {
   PressableProps,
   ViewStyle,
 } from 'react-native';
-import { PrimitiveIcon, UIIcon } from '@gluestack-ui-nightly/core/icon/creator';
-import { tva } from '@gluestack-ui-nightly/utils/nativewind-utils';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import { PrimitiveIcon, UIIcon } from '@gluestack-ui/core/icon/creator';
+import { tva } from '@gluestack-ui/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import {
   Motion,
@@ -356,7 +356,7 @@ const ActionsheetItemText = React.forwardRef<
         bold: Boolean(bold),
         underline: Boolean(underline),
         strikeThrough: Boolean(strikeThrough),
-        size: size as any,
+        size,
       })}
       ref={ref}
       {...props}
@@ -504,7 +504,7 @@ const ActionsheetSectionHeaderText = React.forwardRef<
         bold: Boolean(bold),
         underline: Boolean(underline),
         strikeThrough: Boolean(strikeThrough),
-        size: size as any,
+        size,
         sub: Boolean(sub),
         italic: Boolean(italic),
         highlight: Boolean(highlight),

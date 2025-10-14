@@ -1,5 +1,5 @@
 import React from 'react';
-import type { VariantProps } from '@gluestack-ui-nightly/utils/nativewind-utils';
+import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 
 import { vstackStyle } from './styles';
 
@@ -11,7 +11,7 @@ const VStack = React.forwardRef<React.ComponentRef<'div'>, IVStackProps>(
     return (
       <div
         className={vstackStyle({
-          space: space as any,
+          space,
           reversed: reversed as boolean,
           class: className,
         })}

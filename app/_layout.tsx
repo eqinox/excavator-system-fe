@@ -14,7 +14,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from '@react-navigation/native';
-import AppLoading from 'expo-app-loading';
+// import AppLoading from 'expo-app-loading';
 import { useFonts } from 'expo-font';
 import { Slot } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -51,9 +51,9 @@ export default function RootLayout() {
     setIsLoading(false);
   }, []);
 
-  if (isLoading) {
-    return <AppLoading />;
-  }
+  // if (isLoading) {
+  //   return <AppLoading />;
+  // }
 
   return (
     <SafeAreaProvider>
@@ -72,7 +72,6 @@ function RootLayoutNav() {
     (state: RootState) => state.auth.isAuthenticated
   );
   const [authInitialized, setAuthInitialized] = useState(false);
-
   useEffect(() => {
     // Initialize auth state when the app starts
     dispatch(initializeAuth());

@@ -8,7 +8,7 @@ export default function CategoriesRoute() {
   const dispatch = useDispatch<AppDispatch>();
   // const { categoriesLoading, categoriesError, refreshCategories } =
   //   useCategories();
-
+  
   useEffect(() => {
     dispatch(fetchCategories());
   }, []);

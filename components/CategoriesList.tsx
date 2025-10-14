@@ -43,7 +43,11 @@ export default function CategoriesList() {
   };
 
   const handleLogout = async () => {
-    dispatch(logout());
+    dispatch(logout({
+      onSuccess: (message: string) => {
+        router.replace('/auth');
+      }
+    }));
   };
 
   const handleAddCategory = () => {
@@ -127,6 +131,7 @@ export default function CategoriesList() {
                       source={{
                         uri: `${BASE_URL}/${category.image.small}`,
                       }}
+                      alt={category.name}
                       className='h-full w-full'
                       resizeMode='cover'
                     />

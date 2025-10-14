@@ -1,11 +1,9 @@
-// import { useAuth } from '@/redux/useReduxHooks';
 import { RootState } from '@/store';
 import { Redirect, Slot } from 'expo-router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 export default function PrivateLayout() {
-  // const { loading: isLoading, isAuthenticated } = useAuth();
   const isAuthenticated = useSelector((state: RootState) => {
     return state.auth.isAuthenticated;
   });
@@ -18,7 +16,6 @@ export default function PrivateLayout() {
     // If not authenticated, redirect to auth screen
     return <Redirect href='/(public)/auth' />;
   }
-
-  // If authenticated, show the private content
+  
   return <Slot />;
 }
