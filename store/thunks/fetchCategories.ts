@@ -2,21 +2,21 @@ import {
   CategoriesResponseDto,
   CategoryDeleteResponseDto,
   CategoryResponseDto,
-} from '@/dto/server/category.dto';
-import { assertNoError } from '@/lib/helpers';
-import { CategoryCreateData, CategoryUpdateData } from '@/validation/category';
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { apiSlice } from '../slices/apiSlice';
+} from "@/dto/server/category.dto";
+import { assertNoError } from "@/lib/helpers";
+import { CategoryCreateData, CategoryUpdateData } from "@/validation/category";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { apiSlice } from "../slices/apiSlice";
 
 const fetchCategories = createAsyncThunk(
-  'categories/fetch',
+  "categories/fetch",
   async (_, { dispatch }) => {
     const result = (await dispatch(
-      apiSlice.endpoints.authenticatedGet.initiate('/categories')
+      apiSlice.endpoints.authenticatedGet.initiate("/categories")
     )) as { data: CategoriesResponseDto } | { error: FetchBaseQueryError };
 
-    assertNoError(result, 'An error occurred during fetch categories');
+    assertNoError(result, "An error occurred during fetch categories");
     if (result.data.statusCode >= 200 || result.data.statusCode < 300) {
       return result.data.data;
     } else {
@@ -26,7 +26,7 @@ const fetchCategories = createAsyncThunk(
 );
 
 const createCategory = createAsyncThunk(
-  'categories/create',
+  "categories/create",
   async (
     {
       data,
@@ -42,12 +42,12 @@ const createCategory = createAsyncThunk(
     try {
       const result = (await dispatch(
         apiSlice.endpoints.authenticatedPost.initiate({
-          url: '/categories',
+          url: "/categories",
           data: data,
         })
       )) as { data: CategoryResponseDto } | { error: FetchBaseQueryError };
 
-      assertNoError(result, 'Възникна грешка при създаване на категория');
+      assertNoError(result, "Възникна грешка при създаване на категория");
 
       if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
         onSuccess?.(result.data.message);
@@ -63,7 +63,7 @@ const createCategory = createAsyncThunk(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Грешка при създаване на категория';
+          : "Грешка при създаване на категория";
       onError?.(errorMessage);
       throw error;
     }
@@ -71,7 +71,7 @@ const createCategory = createAsyncThunk(
 );
 
 const editCategory = createAsyncThunk(
-  'categories/edit',
+  "categories/edit",
   async (
     {
       data,
@@ -85,14 +85,18 @@ const editCategory = createAsyncThunk(
     { dispatch }
   ) => {
     try {
+      // Grab everything from data except 'id'
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...payload } = data;
+
       const result = (await dispatch(
         apiSlice.endpoints.authenticatedPatch.initiate({
-          url: `/categories/${data.id}`,
-          data: data,
+          url: `/categories/${id}`,
+          data: payload,
         })
       )) as { data: CategoryResponseDto } | { error: FetchBaseQueryError };
 
-      assertNoError(result, 'Възникна грешка при редактиране на категория');
+      assertNoError(result, "Възникна грешка при редактиране на категория");
 
       if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
         onSuccess?.(result.data.message);
@@ -105,7 +109,7 @@ const editCategory = createAsyncThunk(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Грешка при редактиране на категория';
+          : "Грешка при редактиране на категория";
       onError?.(errorMessage);
       throw error;
     }
@@ -113,7 +117,7 @@ const editCategory = createAsyncThunk(
 );
 
 const deleteCategory = createAsyncThunk(
-  'categories/delete',
+  "categories/delete",
   async (
     {
       categoryId,
@@ -135,7 +139,7 @@ const deleteCategory = createAsyncThunk(
         | { data: CategoryDeleteResponseDto }
         | { error: FetchBaseQueryError };
 
-      assertNoError(result, 'Възникна грешка при изтриване на категория');
+      assertNoError(result, "Възникна грешка при изтриване на категория");
 
       if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
         onSuccess?.(result.data.message);
@@ -148,7 +152,7 @@ const deleteCategory = createAsyncThunk(
       const errorMessage =
         error instanceof Error
           ? error.message
-          : 'Грешка при изтриване на категория';
+          : "Грешка при изтриване на категория";
       onError?.(errorMessage);
       throw error;
     }
@@ -156,13 +160,13 @@ const deleteCategory = createAsyncThunk(
 );
 
 const findCategoryById = createAsyncThunk(
-  'categories/findById',
+  "categories/findById",
   async (categoryId: string, { dispatch }) => {
     const result = (await dispatch(
       apiSlice.endpoints.authenticatedGet.initiate(`/categories/${categoryId}`)
     )) as { data: CategoryResponseDto } | { error: FetchBaseQueryError };
 
-    assertNoError(result, 'Възникна грешка при намиране на категория');
+    assertNoError(result, "Възникна грешка при намиране на категория");
 
     if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
       return result.data.data;

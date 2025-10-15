@@ -5,21 +5,22 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
-} from '@/components/ui/alert-dialog';
-import { Heading } from '@/components/ui/heading';
-import { HStack } from '@/components/ui/hstack';
-import { Text } from '@/components/ui/text';
-import { VStack } from '@/components/ui/vstack';
+} from "@/components/ui/alert-dialog";
+import { Heading } from "@/components/ui/heading";
+import { HStack } from "@/components/ui/hstack";
+import { Text } from "@/components/ui/text";
+import { VStack } from "@/components/ui/vstack";
 // import { useAuth, useCategories } from '@/redux/useReduxHooks';
-import { BASE_URL } from '@/constants';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState, deleteCategory, logout } from '../store';
-import { Button } from './ui/button';
-import { Image } from './ui/image';
-import { Pressable } from './ui/pressable';
-import { Toast, ToastTitle, useToast } from './ui/toast';
+import { BASE_URL } from "@/constants";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState, deleteCategory, logout } from "../store";
+import { Button } from "./ui/button";
+import { EditIcon, TrashIcon } from "./ui/icon";
+import { Image } from "./ui/image";
+import { Pressable } from "./ui/pressable";
+import { Toast, ToastTitle, useToast } from "./ui/toast";
 
 export default function CategoriesList() {
   const router = useRouter();
@@ -37,26 +38,28 @@ export default function CategoriesList() {
 
   const handleCategoryPress = (categoryId: string) => {
     router.push({
-      pathname: '/equipments',
+      pathname: "/equipments",
       params: { id: categoryId.toString() },
     });
   };
 
   const handleLogout = async () => {
-    dispatch(logout({
-      onSuccess: (message: string) => {
-        router.replace('/auth');
-      }
-    }));
+    dispatch(
+      logout({
+        onSuccess: (message: string) => {
+          router.replace("/auth");
+        },
+      })
+    );
   };
 
   const handleAddCategory = () => {
-    router.push('/category/add');
+    router.push("/category/add");
   };
 
   const handleEditCategory = (categoryId: string) => {
     router.push({
-      pathname: '/category/edit',
+      pathname: "/category/edit",
       params: { id: categoryId },
     });
   };
@@ -74,10 +77,10 @@ export default function CategoriesList() {
         categoryId: categoryToDelete,
         onSuccess: (message: string) => {
           toast.show({
-            placement: 'top',
+            placement: "top",
             duration: 3000,
             render: ({ id }) => (
-              <Toast action='success' variant='solid'>
+              <Toast action="success" variant="solid">
                 <ToastTitle>{message}</ToastTitle>
               </Toast>
             ),
@@ -86,10 +89,10 @@ export default function CategoriesList() {
         },
         onError: (message: string) => {
           toast.show({
-            placement: 'top',
+            placement: "top",
             duration: 3000,
             render: ({ id }) => (
-              <Toast action='error' variant='solid'>
+              <Toast action="error" variant="solid">
                 <ToastTitle>{message}</ToastTitle>
               </Toast>
             ),
@@ -105,25 +108,25 @@ export default function CategoriesList() {
   };
 
   return (
-    <VStack className='flex-1 justify-start bg-background-100 px-4'>
-      <VStack space='xl' className='w-full max-w-4xl'>
-        <VStack space='md'>
-          <HStack className='items-center justify-between'>
-            <Heading size='xl' className='flex-1 text-center'>
+    <VStack className="flex-1 justify-start bg-background-100 px-4">
+      <VStack space="xl" className="w-full max-w-4xl">
+        <VStack space="md">
+          <HStack className="items-center justify-between">
+            <Heading size="xl" className="flex-1 text-center">
               Категории
             </Heading>
-            <Button variant='outline' onPress={handleLogout} className='ml-4'>
+            <Button variant="outline" onPress={handleLogout} className="ml-4">
               <Text>Излез</Text>
             </Button>
           </HStack>
         </VStack>
 
-        <VStack space='lg' className='w-full'>
-          <HStack space='md' className='flex-wrap justify-center'>
+        <VStack space="lg" className="w-full">
+          <HStack space="md" className="flex-wrap justify-center">
             {categories.map((category, index) => (
-              <VStack key={index} space='sm' className='items-center'>
+              <VStack key={index} space="sm" className="items-center">
                 <Pressable
-                  className='bg-primary flex h-48 w-48 cursor-pointer items-center justify-center overflow-hidden rounded-lg shadow-md'
+                  className="bg-primary flex h-48 w-48 cursor-pointer items-center justify-center overflow-hidden rounded-lg shadow-md"
                   onPress={() => handleCategoryPress(category.id)}
                 >
                   {category.image && (
@@ -132,48 +135,50 @@ export default function CategoriesList() {
                         uri: `${BASE_URL}/${category.image.small}`,
                       }}
                       alt={category.name}
-                      className='h-full w-full'
-                      resizeMode='cover'
+                      className="h-full w-full"
+                      resizeMode="cover"
                     />
                   )}
                 </Pressable>
-                {user?.role === 'admin' && (
-                  <HStack space='md'>
+                {user?.role === "admin" && (
+                  <HStack space="md">
                     <Button
-                      variant='ghost'
-                      size='sm'
+                      variant="ghost"
+                      size="sm"
                       onPress={() => handleEditCategory(category.id)}
-                      className='bg-yellow-500 p-2'
+                      className="bg-yellow-500 p-2"
                     >
-                      {/* Edit */}
-                      {/* <Ionicons name='create-outline' size={16} color='white' /> */}
+                      <EditIcon width={16} height={16} className="text-white" />
                     </Button>
                     <Button
-                      variant='ghost'
-                      size='sm'
+                      variant="ghost"
+                      size="sm"
                       onPress={() => handleRemoveCategory(category.id)}
-                      className='bg-red-500 p-2 text-white'
+                      className="bg-red-500 p-2 text-white"
                     >
-                      {/* Remove */}
-                      {/* <Ionicons name='trash-outline' size={16} color='white' /> */}
+                      <TrashIcon
+                        width={16}
+                        height={16}
+                        className="text-white"
+                      />
                     </Button>
                   </HStack>
                 )}
-                <Text className='max-w-24 text-center text-sm font-medium'>
+                <Text className="max-w-24 text-center text-sm font-medium">
                   {category.name}
                 </Text>
               </VStack>
             ))}
             {categories.length === 0 && (
-              <Text className='text-center text-sm'>
+              <Text className="text-center text-sm">
                 Няма налични категории
               </Text>
             )}
-            {user?.role === 'admin' && (
+            {user?.role === "admin" && (
               <Button
-                variant='outline'
+                variant="outline"
                 onPress={handleAddCategory}
-                className='ml-4'
+                className="ml-4"
               >
                 <Text>Добавяне на категория</Text>
               </Button>
@@ -187,30 +192,30 @@ export default function CategoriesList() {
         <AlertDialogBackdrop />
         <AlertDialogContent>
           <AlertDialogHeader>
-            <Text className='text-lg font-semibold text-typography-900'>
+            <Text className="text-lg font-semibold text-typography-900">
               Изтриване на категория
             </Text>
           </AlertDialogHeader>
           <AlertDialogBody>
-            <Text className='text-typography-600'>
+            <Text className="text-typography-600">
               Сигурни ли сте, че искате да изтриете тази категория? Това
               действие не може да бъде отменено.
             </Text>
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button
-              variant='outline'
+              variant="outline"
               onPress={cancelDeleteCategory}
-              className='mr-2'
+              className="mr-2"
             >
               <Text>Отказ</Text>
             </Button>
             <Button
-              variant='solid'
+              variant="solid"
               onPress={confirmDeleteCategory}
-              className='bg-red-500'
+              className="bg-red-500"
             >
-              <Text className='text-white'>Изтрий</Text>
+              <Text className="text-white">Изтрий</Text>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
