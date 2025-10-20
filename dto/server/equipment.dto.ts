@@ -1,4 +1,4 @@
-import { CommonResponse } from '../common.dto';
+import { CommonResponse, ImageDto } from "../common.dto";
 
 export interface EquipmentReponseDataDto {
   name: string;
@@ -8,8 +8,11 @@ export interface EquipmentReponseDataDto {
   available?: boolean;
   location_id: string;
   owner: string;
-  images: string[];
+  images: ImageDto[];
 }
+
+export interface AllEquipmentsResponseDto
+  extends CommonResponse<EquipmentReponseDataDto[]> {}
 
 export interface EquipmentReponseDto
   extends CommonResponse<EquipmentReponseDataDto> {}

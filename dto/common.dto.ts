@@ -11,3 +11,8 @@ export interface ApiErrorResponse {
   timestamp: number;
   data: any;
 }
+
+export interface ImageDto {
+  original: string;
+  small: string;
+}

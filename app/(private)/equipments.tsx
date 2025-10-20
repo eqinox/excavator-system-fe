@@ -1,13 +1,27 @@
+import EquipmentsList from "@/components/lists/EquipmentsList";
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { AppDispatch, RootState, fetchEquipmentsByCategoryId } from "@/store";
 // import { useEquipment } from '@/redux/useReduxHooks';
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Equipments() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  const { equipments, isLoading, error } = useSelector(
+    (state: RootState) => state.equipments
+  );
+
+  useEffect(() => {
+    if (id && typeof id === "string") {
+      dispatch(fetchEquipmentsByCategoryId(id));
+    }
+  }, [id]);
   // const {
   //   getEquipmentById,
   //   equipmentLoading: loading,
@@ -23,14 +37,15 @@ export default function Equipments() {
   // }, [id]);
 
   const handleCreateEquipment = () => {
-    // router.push({
-    //   pathname: '/equipment/create',
-    //   params: {
-    //     categoryId: id,
-    //   },
-    // });
+    router.push({
+      pathname: "/equipment/create",
+      params: {
+        categoryId: id,
+      },
+    });
   };
 
+  console.log(equipments);
   return (
     <VStack className="flex-1 justify-start bg-background-300 px-4">
       <VStack space="xl" className="w-full max-w-4xl">
@@ -43,20 +58,21 @@ export default function Equipments() {
         </VStack>
 
         <VStack space="xl" className="w-full max-w-4xl">
-          {/* <VStack space='lg' className='w-full'>
-            {loading && (
-              <Text className='text-center text-lg font-medium'>
+          <VStack space="lg" className="w-full">
+            {isLoading && (
+              <Text className="text-center text-lg font-medium">
                 Зареждане...
               </Text>
             )}
 
             {error && (
-              <Text className='text-center text-lg font-medium text-red-500'>
+              <Text className="text-center text-lg font-medium text-red-500">
                 Грешка: {error}
               </Text>
             )}
+            <EquipmentsList />
 
-            {!loading && !error && selectedEquipment && (
+            {/* {!isLoading && !error && selectedEquipment && (
               <HStack space='md' className='flex-wrap justify-center'>
                 <VStack space='sm' className='items-center'>
                   <Box className='bg-primary flex h-48 w-48 items-center justify-center overflow-hidden rounded-lg shadow-md'>
@@ -82,14 +98,14 @@ export default function Equipments() {
                   </Text>
                 </VStack>
               </HStack>
-            )}
+            )} */}
 
-            {!loading && !error && !selectedEquipment && (
-              <Text className='text-center text-lg font-medium'>
+            {!isLoading && !error && equipments.length === 0 && (
+              <Text className="text-center text-lg font-medium">
                 Няма налично оборудване
               </Text>
             )}
-          </VStack> */}
+          </VStack>
         </VStack>
       </VStack>
     </VStack>
