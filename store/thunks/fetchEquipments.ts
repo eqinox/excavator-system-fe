@@ -1,12 +1,15 @@
 import {
-  AllEquipmentsResponseDto,
-  EquipmentReponseDto,
-} from "@/dto/server/equipment.dto";
-import { assertNoError } from "@/lib/helpers";
+  EquipmentDeleteResponseDto,
+  EquipmentResponseDto,
+} from "@/dto/equipment.dto";
+import { handleFetchBaseQueryError } from "@/lib/helpers";
 import { EquipmentFormData } from "@/validation/equipment";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { apiSlice } from "../slices/apiSlice";
+import CallbackHandlers from "./callback-type";
+
+// Interface for common callback parameters
 
 const fetchEquipmentsByCategoryId = createAsyncThunk(
   "equipments/fetchByCategoryId",
@@ -15,13 +18,13 @@ const fetchEquipmentsByCategoryId = createAsyncThunk(
       apiSlice.endpoints.authenticatedGet.initiate(
         `/equipment/category/${categoryId}`
       )
-    )) as { data: AllEquipmentsResponseDto } | { error: FetchBaseQueryError };
+    )) as { data: EquipmentResponseDto[] } | { error: FetchBaseQueryError };
 
-    assertNoError(result, "An error occurred during fetch equipments");
-    if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
-      return result.data.data;
-    } else {
-      throw new Error(result.data.message);
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
     }
   }
 );
@@ -34,13 +37,8 @@ const createEquipment = createAsyncThunk(
       onSuccess,
       onError,
     }: {
-      data: Omit<EquipmentFormData, "price_per_day"> & {
-        price_per_day: number;
-        category_id: string;
-      };
-      onSuccess?: (message: string) => void;
-      onError?: (message: string) => void;
-    },
+      data: EquipmentFormData;
+    } & CallbackHandlers,
     { dispatch }
   ) => {
     const result = (await dispatch(
@@ -48,18 +46,46 @@ const createEquipment = createAsyncThunk(
         url: "/equipment",
         data,
       })
-    )) as { data: EquipmentReponseDto } | { error: FetchBaseQueryError };
+    )) as { data: EquipmentResponseDto } | { error: FetchBaseQueryError };
 
-    assertNoError(result, "An error occurred during create equipment");
-
-    if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
-      onSuccess?.(result.data.message);
+    if ("data" in result) {
+      onSuccess?.("Оборудването е създадено успешно");
       return result.data;
-    } else {
-      onError?.(result.data.message);
-      throw new Error(result.data.message);
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      onError?.(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 );
 
-export { createEquipment, fetchEquipmentsByCategoryId };
+const deleteEquipment = createAsyncThunk(
+  "equipments/delete",
+  async (
+    {
+      equipmentId,
+      onSuccess,
+      onError,
+    }: {
+      equipmentId: string;
+    } & CallbackHandlers,
+    { dispatch }
+  ) => {
+    const result = (await dispatch(
+      apiSlice.endpoints.authenticatedDelete.initiate(
+        `/equipment/${equipmentId}`
+      )
+    )) as { data: EquipmentDeleteResponseDto } | { error: FetchBaseQueryError };
+
+    if ("data" in result) {
+      onSuccess?.(result.data.message);
+      return equipmentId;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      onError?.(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+);
+
+export { createEquipment, deleteEquipment, fetchEquipmentsByCategoryId };

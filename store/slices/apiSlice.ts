@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/constants";
-import { CommonResponse } from "@/dto/common.dto";
+// import { CommonResponse } from "@/dto/common.dto";
 import {
   BaseQueryFn,
   FetchArgs,
@@ -61,12 +61,12 @@ export const apiSlice = createApi({
   tagTypes: ["Category", "Equipment", "User"],
   endpoints: (builder) => ({
     // Generic GET request
-    get: builder.query<CommonResponse<any>, string>({
+    get: builder.mutation<any, string>({
       query: (url) => url,
     }),
 
     // Generic POST request
-    post: builder.mutation<CommonResponse<any>, { url: string; data: any }>({
+    post: builder.mutation<any, { url: string; data: any }>({
       query: ({ url, data }) => ({
         url,
         method: "POST",
@@ -170,7 +170,6 @@ export const apiSlice = createApi({
 
 // Export hooks for usage in components
 export const {
-  useGetQuery,
   usePostMutation,
   usePutMutation,
   useDeleteMutation,

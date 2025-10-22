@@ -1,18 +1,18 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { CategoryResponseDataDto } from '../../dto/server/category.dto';
+import { CategoryResponseDto } from "@/dto/category.dto";
+import { createSlice } from "@reduxjs/toolkit";
 import {
   createCategory,
   deleteCategory,
   editCategory,
   fetchCategories,
   findCategoryById,
-} from '../thunks/fetchCategories';
+} from "../thunks/fetchCategories";
 
 export interface CategoriesState {
-  categories: CategoryResponseDataDto[];
+  categories: CategoryResponseDto[];
   isLoading: boolean;
   error: string | null;
-  selectedCategory: CategoryResponseDataDto | null;
+  selectedCategory: CategoryResponseDto | null;
   message: string;
 }
 
@@ -21,11 +21,11 @@ const initialState: CategoriesState = {
   isLoading: false,
   error: null,
   selectedCategory: null,
-  message: '',
+  message: "",
 };
 
 export const categoriesSlice = createSlice({
-  name: 'categories',
+  name: "categories",
   initialState,
   reducers: {},
   extraReducers(builder) {
@@ -34,17 +34,17 @@ export const categoriesSlice = createSlice({
       state.isLoading = true;
       state.categories = [];
       state.error = null;
-      state.message = '';
+      state.message = "";
     });
     builder.addCase(fetchCategories.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.categories = action.payload;
+      state.categories = action.payload as CategoryResponseDto[];
       state.error = null;
     });
     builder.addCase(fetchCategories.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || 'Failed to fetch categories';
-      state.message = '';
+      state.error = action.error.message || "Failed to fetch categories";
+      state.message = "";
     });
 
     // Create category
@@ -52,18 +52,17 @@ export const categoriesSlice = createSlice({
       state.isLoading = true;
       state.categories = [];
       state.error = null;
-      state.message = '';
+      state.message = "";
     });
     builder.addCase(createCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.categories.push(action.payload.data);
-      state.message = action.payload.message;
+      state.categories.push(action.payload as CategoryResponseDto);
       state.error = null;
     });
     builder.addCase(createCategory.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || 'Failed to create category';
-      state.message = '';
+      state.error = action.error.message || "Failed to create category";
+      state.message = "";
     });
 
     // Edit category
@@ -71,54 +70,57 @@ export const categoriesSlice = createSlice({
       state.isLoading = true;
       state.categories = [];
       state.error = null;
-      state.message = '';
+      state.message = "";
     });
     builder.addCase(editCategory.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.message = action.payload.message;
+      state.categories = state.categories.map((category) =>
+        category.id === action.payload?.id
+          ? (action.payload as CategoryResponseDto)
+          : category
+      );
       state.error = null;
     });
     builder.addCase(editCategory.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || 'Failed to edit category';
-      state.message = '';
+      state.error = action.error.message || "Failed to edit category";
+      state.message = "";
     });
 
     // Delete category
     builder.addCase(deleteCategory.pending, (state, action) => {
       state.isLoading = true;
       state.error = null;
-      state.message = '';
+      state.message = "";
     });
     builder.addCase(deleteCategory.fulfilled, (state, action) => {
       state.isLoading = false;
       state.categories = state.categories.filter(
-        category => category.id !== action.payload.id
+        (category) => category.id !== action.payload
       );
-      state.message = action.payload.message;
       state.error = null;
     });
     builder.addCase(deleteCategory.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || 'Failed to delete category';
-      state.message = '';
+      state.error = action.error.message || "Failed to delete category";
+      state.message = "";
     });
 
     // Find category by id
     builder.addCase(findCategoryById.pending, (state, action) => {
       state.isLoading = true;
       state.error = null;
-      state.message = '';
+      state.message = "";
     });
     builder.addCase(findCategoryById.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.selectedCategory = action.payload;
+      state.selectedCategory = action.payload as CategoryResponseDto;
       state.error = null;
     });
     builder.addCase(findCategoryById.rejected, (state, action) => {
       state.isLoading = false;
-      state.error = action.error.message || 'Failed to find category by id';
-      state.message = '';
+      state.error = action.error.message || "Failed to find category by id";
+      state.message = "";
     });
   },
 });

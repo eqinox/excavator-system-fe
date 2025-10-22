@@ -46,11 +46,12 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
     watch,
   } = useForm<EquipmentFormData>({
     resolver: zodResolver(equipmentSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
+      category_id: categoryId,
       name: "",
       description: "",
-      price_per_day: "",
+      price_per_day: 0,
       location_id: "",
       available: true,
       images: [],
@@ -116,12 +117,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
 
     dispatch(
       createEquipment({
-        data: {
-          ...equipmentData,
-          price_per_day: parseFloat(equipmentData.price_per_day),
-          category_id: categoryId,
-          images: processedImages,
-        },
+        data: { ...equipmentData, images: processedImages },
         onSuccess: (message: string) => {
           toast.show({
             placement: "top",
@@ -133,7 +129,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
             ),
           });
           reset();
-          router.replace("/equipments");
+          router.replace(`/equipments?=${categoryId}`);
         },
         onError: (message: string) => {
           toast.show({
@@ -248,7 +244,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                     <Input>
                       <InputField
                         placeholder="150.00"
-                        value={value}
+                        value={value === 0 ? "" : value.toString()}
                         onChangeText={(text) => {
                           // Only allow numeric input with decimal point
                           const numericText = text.replace(/[^0-9.]/g, "");
@@ -258,7 +254,10 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                             parts.length > 2
                               ? parts[0] + "." + parts.slice(1).join("")
                               : numericText;
-                          onChange(cleanText);
+                          // Convert to number, default to 0 if empty
+                          const numericValue =
+                            cleanText === "" ? 0 : parseFloat(cleanText);
+                          onChange(numericValue);
                         }}
                         onBlur={onBlur}
                         keyboardType="numeric"
@@ -305,7 +304,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
               </FormControl>
 
               {/* Images Field */}
-              <FormControl isInvalid={selectedImages.length === 0}>
+              <FormControl isInvalid={!!getFieldError("images")}>
                 <FormControlLabel>
                   <FormControlLabelText>Изображения *</FormControlLabelText>
                 </FormControlLabel>
@@ -361,10 +360,10 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                   )}
                 </VStack>
 
-                {(!selectedImages || selectedImages.length === 0) && (
+                {getFieldError("images") && (
                   <FormControlError>
                     <FormControlErrorText>
-                      Поне едно изображение е задължително
+                      {getFieldError("images")}
                     </FormControlErrorText>
                   </FormControlError>
                 )}

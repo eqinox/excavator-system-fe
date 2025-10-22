@@ -1,15 +1,16 @@
-import { EquipmentReponseDataDto } from "@/dto/server/equipment.dto";
+import { EquipmentResponseDto } from "@/dto/equipment.dto";
 import { createSlice } from "@reduxjs/toolkit";
 import {
   createEquipment,
+  deleteEquipment,
   fetchEquipmentsByCategoryId,
 } from "../thunks/fetchEquipments";
 
 export interface EquipmentsState {
-  equipments: EquipmentReponseDataDto[];
+  equipments: EquipmentResponseDto[];
   isLoading: boolean;
   error: string | null;
-  selectedEquipment: EquipmentReponseDataDto | null;
+  selectedEquipment: EquipmentResponseDto | null;
   message: string;
 }
 
@@ -35,7 +36,7 @@ export const equipmentsSlice = createSlice({
     });
     builder.addCase(fetchEquipmentsByCategoryId.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.equipments = action.payload;
+      state.equipments = action.payload as EquipmentResponseDto[];
       state.error = null;
     });
     builder.addCase(fetchEquipmentsByCategoryId.rejected, (state, action) => {
@@ -52,13 +53,31 @@ export const equipmentsSlice = createSlice({
     });
     builder.addCase(createEquipment.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.equipments.push(action.payload.data);
-      state.message = action.payload.message;
+      state.equipments.push(action.payload as EquipmentResponseDto);
       state.error = null;
     });
     builder.addCase(createEquipment.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to create equipment";
+      state.message = "";
+    });
+
+    // Delete equipment
+    builder.addCase(deleteEquipment.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+      state.message = "";
+    });
+    builder.addCase(deleteEquipment.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.equipments = state.equipments.filter(
+        (equipment) => equipment.id !== action.payload
+      );
+      state.error = null;
+    });
+    builder.addCase(deleteEquipment.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to delete equipment";
       state.message = "";
     });
   },

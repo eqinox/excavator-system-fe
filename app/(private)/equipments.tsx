@@ -1,5 +1,5 @@
 import EquipmentsList from "@/components/lists/EquipmentsList";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
@@ -45,14 +45,20 @@ export default function Equipments() {
     });
   };
 
-  console.log(equipments);
+  const handleBackToCategories = () => {
+    router.push("/categories");
+  };
+
   return (
     <VStack className="flex-1 justify-start bg-background-300 px-4">
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md" className="mb-4 mt-4">
-          <HStack className="justify-end">
+          <HStack className="justify-between">
+            <Button variant="outline" onPress={handleBackToCategories}>
+              <ButtonText>← Назад към категории</ButtonText>
+            </Button>
             <Button variant="outline" onPress={() => handleCreateEquipment()}>
-              <Text>Публикувай оборудване</Text>
+              <ButtonText>Публикувай оборудване</ButtonText>
             </Button>
           </HStack>
         </VStack>

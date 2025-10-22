@@ -1,12 +1,10 @@
-import {
-  LoginResponseDto,
-  RefreshTokenResponseDto,
-} from "@/dto/server/auth.dto";
-import { assertNoError } from "@/lib/helpers";
+import { LoginResponseDto, LogoutResponseDto } from "@/dto/auth.dto";
+import { handleFetchBaseQueryError } from "@/lib/helpers";
 import { LoginFormData } from "@/validation/authentication";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { apiSlice } from "../slices/apiSlice";
+import CallbackHandlers from "./callback-type";
 
 const login = createAsyncThunk(
   "auth/login",
@@ -18,36 +16,28 @@ const login = createAsyncThunk(
       })
     )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
 
-    // This assertion function will throw if there's an error, otherwise TypeScript knows result is { data: LoginResponseDto }
-    assertNoError(result, "An error occurred during login");
-
-    return result.data.data;
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
+    }
   }
 );
 
 const logout = createAsyncThunk(
   "auth/logout",
-  async (
-    {
-      onSuccess,
-      onError,
-    }: {
-      onSuccess?: (message: string) => void;
-      onError?: (message: string) => void;
-    },
-    { dispatch }
-  ) => {
+  async ({ onSuccess, onError }: CallbackHandlers, { dispatch }) => {
     const result = (await dispatch(
       apiSlice.endpoints.authenticatedGet.initiate("/auth/logout")
-    )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
-    // This assertion function will throw if there's an error, otherwise TypeScript knows result is { data: any }
-    assertNoError(result, "An error occurred during logout");
+    )) as { data: LogoutResponseDto } | { error: FetchBaseQueryError };
 
-    if (result.data.statusCode >= 200 && result.data.statusCode < 300) {
+    if ("data" in result) {
       onSuccess?.(result.data.message);
-    } else {
-      onError?.(result.data.message);
-      throw new Error(result.data.message);
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      onError?.(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 );
@@ -55,23 +45,17 @@ const logout = createAsyncThunk(
 export const initializeAuth = createAsyncThunk(
   "auth/initialize",
   async (_, { dispatch }) => {
-    try {
-      // Use the apiSlice's refresh endpoint to get a new token
-      // This will use the HTTP-only cookie to refresh the token
-      const result = (await dispatch(
-        apiSlice.endpoints.get.initiate("/auth/refresh")
-      )) as { data: RefreshTokenResponseDto } | { error: FetchBaseQueryError };
+    // Use the apiSlice's refresh endpoint to get a new token
+    // This will use the HTTP-only cookie to refresh the token
+    const result = (await dispatch(
+      apiSlice.endpoints.get.initiate("/auth/refresh")
+    )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
 
-      assertNoError(result, "An error occurred during initialize auth");
-
-      if (result.data.statusCode >= 200 || result.data.statusCode < 300) {
-        return result.data.data;
-      } else {
-        throw new Error(result.data.message);
-      }
-    } catch (error) {
-      console.error("Failed to initialize auth:", error);
-      throw error;
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
     }
   }
 );

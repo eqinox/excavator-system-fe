@@ -1,4 +1,4 @@
-import { UserDto } from "@/dto/client/auth.dto";
+import { UserDto } from "@/dto/auth.dto";
 import { createSlice } from "@reduxjs/toolkit";
 import { initializeAuth, login, logout } from "../thunks/fetchAuthentication";
 
@@ -49,8 +49,9 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isAuthenticated = false;
       state.token = null;
+      state.user = null;
       // state.error =
-      //   action.error.message || 'Failed to initialize authentication';
+      //   action.error.message || "Failed to initialize authentication";
     });
 
     // Login cases
@@ -62,8 +63,9 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isAuthenticated = true;
       state.error = null;
-      state.token = action.payload.access_token;
-      state.user = action.payload.user;
+      // Add null checks to ensure properties exist
+      state.token = action.payload?.access_token || null;
+      state.user = action.payload?.user || null;
     });
     builder.addCase(login.rejected, (state, action) => {
       state.isLoading = false;
@@ -85,6 +87,8 @@ const authSlice = createSlice({
     builder.addCase(logout.rejected, (state, action) => {
       state.isLoading = false;
       state.isAuthenticated = false;
+      state.token = null;
+      state.user = null;
       state.error = action.error.message || "Logout failed";
     });
   },
