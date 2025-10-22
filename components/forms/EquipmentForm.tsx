@@ -12,7 +12,12 @@ import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { AppDispatch, RootState, createEquipment } from "@/store";
+import {
+  AppDispatch,
+  RootState,
+  createEquipment,
+  fetchEquipmentsByCategoryId,
+} from "@/store";
 import {
   equipmentSchema,
   type EquipmentFormData,
@@ -129,7 +134,9 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
             ),
           });
           reset();
-          router.replace(`/equipments?=${categoryId}`);
+          // Refetch equipments to ensure fresh data before redirect
+          dispatch(fetchEquipmentsByCategoryId(categoryId));
+          router.replace(`/equipments?id=${categoryId}`);
         },
         onError: (message: string) => {
           toast.show({

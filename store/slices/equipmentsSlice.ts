@@ -30,7 +30,6 @@ export const equipmentsSlice = createSlice({
     // Fetch equipments
     builder.addCase(fetchEquipmentsByCategoryId.pending, (state, action) => {
       state.isLoading = true;
-      state.equipments = [];
       state.error = null;
       state.message = "";
     });
