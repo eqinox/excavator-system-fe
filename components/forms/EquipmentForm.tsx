@@ -153,165 +153,165 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
 
   return (
     <Box className="min-h-screen flex-1 bg-background-300">
-      <Box className="flex-1 items-center justify-center px-4 py-4">
-        <Card className="w-full max-w-md bg-background-0 p-6 shadow-lg">
-          <VStack space="md" className="w-full">
-            {/* Header */}
-            <Box className="mb-6 items-center">
-              <Text className="mb-2 text-2xl font-bold text-typography-900">
-                Публикувай оборудване
-              </Text>
-              <Text className="text-center text-typography-500">
-                Въведете данните за новото оборудване
-              </Text>
-            </Box>
-
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <Box className="flex-1 items-center justify-center px-4 py-4">
+          <Card className="w-full max-w-md bg-background-0 p-6 shadow-lg">
             <VStack space="md" className="w-full">
-              {/* Name Field */}
-              <FormControl isInvalid={!!getFieldError("name")}>
-                <FormControlLabel>
-                  <FormControlLabelText>
-                    Име на оборудването *
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <Controller
-                  control={control}
-                  name="name"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input>
-                      <InputField
-                        placeholder="Напр. CAT 320 Excavator"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        autoCapitalize="words"
-                        returnKeyType="next"
-                      />
-                    </Input>
+              {/* Header */}
+              <Box className="mb-6 items-center">
+                <Text className="mb-2 text-2xl font-bold text-typography-900">
+                  Публикувай оборудване
+                </Text>
+                <Text className="text-center text-typography-500">
+                  Въведете данните за новото оборудване
+                </Text>
+              </Box>
+
+              <VStack space="md" className="w-full">
+                {/* Name Field */}
+                <FormControl isInvalid={!!getFieldError("name")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>
+                      Име на оборудването *
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="name"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input>
+                        <InputField
+                          placeholder="Напр. CAT 320 Excavator"
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          autoCapitalize="words"
+                          returnKeyType="next"
+                        />
+                      </Input>
+                    )}
+                  />
+                  {getFieldError("name") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("name")}
+                      </FormControlErrorText>
+                    </FormControlError>
                   )}
-                />
-                {getFieldError("name") && (
+                </FormControl>
+
+                {/* Description Field */}
+                <FormControl isInvalid={!!getFieldError("description")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>Описание *</FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="description"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input>
+                        <InputField
+                          placeholder="Описание на оборудването..."
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          multiline
+                          numberOfLines={3}
+                          returnKeyType="next"
+                        />
+                      </Input>
+                    )}
+                  />
+                  {getFieldError("description") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("description")}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  )}
+                </FormControl>
+
+                {/* Price Field */}
+                <FormControl isInvalid={!!getFieldError("price_per_day")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>
+                      Цена на ден (лв.) *
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="price_per_day"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input>
+                        <InputField
+                          placeholder="150.00"
+                          value={value === 0 ? "" : value.toString()}
+                          onChangeText={(text) => {
+                            // Only allow numeric input with decimal point
+                            const numericText = text.replace(/[^0-9.]/g, "");
+                            // Prevent multiple decimal points
+                            const parts = numericText.split(".");
+                            const cleanText =
+                              parts.length > 2
+                                ? parts[0] + "." + parts.slice(1).join("")
+                                : numericText;
+                            // Convert to number, default to 0 if empty
+                            const numericValue =
+                              cleanText === "" ? 0 : parseFloat(cleanText);
+                            onChange(numericValue);
+                          }}
+                          onBlur={onBlur}
+                          keyboardType="numeric"
+                          returnKeyType="next"
+                        />
+                      </Input>
+                    )}
+                  />
+                  {getFieldError("price_per_day") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("price_per_day")}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  )}
+                </FormControl>
+
+                {/* Location Field */}
+                <FormControl isInvalid={!!getFieldError("location_id")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>Локация *</FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="location_id"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <Input variant="outline" size="md">
+                        <InputField
+                          placeholder="Напр. София, България"
+                          value={value}
+                          onChangeText={onChange}
+                          onBlur={onBlur}
+                          returnKeyType="done"
+                          onSubmitEditing={() => handleSubmit(onSubmit)()}
+                        />
+                      </Input>
+                    )}
+                  />
                   <FormControlError>
                     <FormControlErrorText>
-                      {getFieldError("name")}
+                      {getFieldError("location_id")}
                     </FormControlErrorText>
                   </FormControlError>
-                )}
-              </FormControl>
+                </FormControl>
 
-              {/* Description Field */}
-              <FormControl isInvalid={!!getFieldError("description")}>
-                <FormControlLabel>
-                  <FormControlLabelText>Описание *</FormControlLabelText>
-                </FormControlLabel>
-                <Controller
-                  control={control}
-                  name="description"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input>
-                      <InputField
-                        placeholder="Описание на оборудването..."
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        multiline
-                        numberOfLines={3}
-                        returnKeyType="next"
-                      />
-                    </Input>
-                  )}
-                />
-                {getFieldError("description") && (
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {getFieldError("description")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                )}
-              </FormControl>
+                {/* Images Field */}
+                <FormControl isInvalid={!!getFieldError("images")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>Изображения *</FormControlLabelText>
+                  </FormControlLabel>
 
-              {/* Price Field */}
-              <FormControl isInvalid={!!getFieldError("price_per_day")}>
-                <FormControlLabel>
-                  <FormControlLabelText>
-                    Цена на ден (лв.) *
-                  </FormControlLabelText>
-                </FormControlLabel>
-                <Controller
-                  control={control}
-                  name="price_per_day"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input>
-                      <InputField
-                        placeholder="150.00"
-                        value={value === 0 ? "" : value.toString()}
-                        onChangeText={(text) => {
-                          // Only allow numeric input with decimal point
-                          const numericText = text.replace(/[^0-9.]/g, "");
-                          // Prevent multiple decimal points
-                          const parts = numericText.split(".");
-                          const cleanText =
-                            parts.length > 2
-                              ? parts[0] + "." + parts.slice(1).join("")
-                              : numericText;
-                          // Convert to number, default to 0 if empty
-                          const numericValue =
-                            cleanText === "" ? 0 : parseFloat(cleanText);
-                          onChange(numericValue);
-                        }}
-                        onBlur={onBlur}
-                        keyboardType="numeric"
-                        returnKeyType="next"
-                      />
-                    </Input>
-                  )}
-                />
-                {getFieldError("price_per_day") && (
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {getFieldError("price_per_day")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                )}
-              </FormControl>
-
-              {/* Location Field */}
-              <FormControl isInvalid={!!getFieldError("location_id")}>
-                <FormControlLabel>
-                  <FormControlLabelText>Локация *</FormControlLabelText>
-                </FormControlLabel>
-                <Controller
-                  control={control}
-                  name="location_id"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input variant="outline" size="md">
-                      <InputField
-                        placeholder="Напр. София, България"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        returnKeyType="done"
-                        onSubmitEditing={() => handleSubmit(onSubmit)()}
-                      />
-                    </Input>
-                  )}
-                />
-                <FormControlError>
-                  <FormControlErrorText>
-                    {getFieldError("location_id")}
-                  </FormControlErrorText>
-                </FormControlError>
-              </FormControl>
-
-              {/* Images Field */}
-              <FormControl isInvalid={!!getFieldError("images")}>
-                <FormControlLabel>
-                  <FormControlLabelText>Изображения *</FormControlLabelText>
-                </FormControlLabel>
-
-                <VStack space="sm">
-                  {selectedImages && selectedImages.length > 0 ? (
-                    <Box className="items-center">
+                  <VStack space="sm">
+                    {selectedImages && selectedImages.length > 0 ? (
                       <VStack space="sm">
                         <Text className="text-sm text-gray-600">
                           Избрани изображения ({selectedImages.length})
@@ -319,8 +319,9 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                         <ScrollView
                           horizontal
                           showsHorizontalScrollIndicator={false}
+                          className="max-h-24"
                         >
-                          <HStack space="sm">
+                          <HStack space="sm" className="px-1">
                             {selectedImages.map((image: any, index: number) => (
                               <Box key={index} className="relative">
                                 <RNImage
@@ -330,7 +331,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                                 />
                                 <Pressable
                                   onPress={() => removeImage(index)}
-                                  className="absolute -right-2 -top-2 h-6 w-6 items-center justify-center rounded-full bg-red-500"
+                                  className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-red-500"
                                 >
                                   <Text className="text-xs text-white">×</Text>
                                 </Pressable>
@@ -341,84 +342,83 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="mt-2"
                           onPress={() => setValue("images", [])}
                         >
                           <ButtonText>Премахни всички изображения</ButtonText>
                         </Button>
                       </VStack>
-                    </Box>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onPress={pickImages}
-                      disabled={isLoading}
-                      className="h-32 items-center justify-center"
-                    >
-                      <ButtonText>Избери изображения</ButtonText>
-                    </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onPress={pickImages}
+                        disabled={isLoading}
+                        className="h-24 items-center justify-center"
+                      >
+                        <ButtonText>Избери изображения</ButtonText>
+                      </Button>
+                    )}
+                  </VStack>
+
+                  {getFieldError("images") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("images")}
+                      </FormControlErrorText>
+                    </FormControlError>
                   )}
-                </VStack>
+                </FormControl>
 
-                {getFieldError("images") && (
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {getFieldError("images")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                )}
-              </FormControl>
+                {/* Availability Field */}
+                <FormControl>
+                  <FormControlLabel>
+                    <FormControlLabelText>Наличност</FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="available"
+                    render={({ field: { onChange, value } }) => (
+                      <Button
+                        variant={value ? "solid" : "outline"}
+                        onPress={() => onChange(!value)}
+                        className="justify-start"
+                      >
+                        <Text>{value ? "✓ Налично" : "✗ Не е налично"}</Text>
+                      </Button>
+                    )}
+                  />
+                </FormControl>
 
-              {/* Availability Field */}
-              <FormControl>
-                <FormControlLabel>
-                  <FormControlLabelText>Наличност</FormControlLabelText>
-                </FormControlLabel>
-                <Controller
-                  control={control}
-                  name="available"
-                  render={({ field: { onChange, value } }) => (
-                    <Button
-                      variant={value ? "solid" : "outline"}
-                      onPress={() => onChange(!value)}
-                      className="justify-start"
-                    >
-                      <Text>{value ? "✓ Налично" : "✗ Не е налично"}</Text>
-                    </Button>
-                  )}
-                />
-              </FormControl>
+                {/* Submit Button */}
+                <Button
+                  size="lg"
+                  className="mt-4 bg-primary-500"
+                  onPress={handleSubmit(onSubmit)}
+                  isDisabled={isLoading}
+                >
+                  <ButtonText>
+                    {isLoading ? "Обработване..." : "Публикувай оборудване"}
+                  </ButtonText>
+                </Button>
+              </VStack>
 
-              {/* Submit Button */}
-              <Button
-                size="lg"
-                className="mt-4 bg-primary-500"
-                onPress={handleSubmit(onSubmit)}
-                isDisabled={isLoading}
-              >
-                <ButtonText>
-                  {isLoading ? "Обработване..." : "Публикувай оборудване"}
-                </ButtonText>
-              </Button>
+              {/* Back Button */}
+              <HStack className="items-center justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onPress={() => {
+                    reset();
+                    router.back();
+                  }}
+                >
+                  <ButtonText>Отказ</ButtonText>
+                </Button>
+              </HStack>
             </VStack>
-
-            {/* Back Button */}
-            <HStack className="items-center justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onPress={() => {
-                  reset();
-                  router.back();
-                }}
-              >
-                <ButtonText>Отказ</ButtonText>
-              </Button>
-            </HStack>
-          </VStack>
-        </Card>
-      </Box>
+          </Card>
+        </Box>
+      </ScrollView>
     </Box>
   );
 }
