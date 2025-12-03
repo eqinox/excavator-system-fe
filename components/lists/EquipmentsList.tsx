@@ -8,7 +8,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BASE_URL } from "@/constants";
 import { AppDispatch, RootState, deleteEquipment } from "@/store";
+import { useRouter } from "expo-router";
 import { useState } from "react";
+import { Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../ui/button";
 import { HStack } from "../ui/hstack";
@@ -21,12 +23,21 @@ import { VStack } from "../ui/vstack";
 export default function EquipmentsList() {
   const { equipments } = useSelector((state: RootState) => state.equipments);
   const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
   const toast = useToast();
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [equipmentToDelete, setEquipmentToDelete] = useState<string | null>(
     null
   );
+
+  const handleEquipmentPress = (equipmentId: string) => {
+    router.push({
+      pathname: "/equipment/[id]",
+      params: { id: equipmentId },
+    });
+  };
+
   const handleRemoveEquipment = (equipmentId: string) => {
     setEquipmentToDelete(equipmentId);
     setShowDeleteDialog(true);
@@ -72,38 +83,43 @@ export default function EquipmentsList() {
   return (
     <VStack className="p-2">
       {equipments.map((equipment, index) => (
-        <HStack
+        <Pressable
           key={index}
-          className="bg-background-100 m-2 p-3 rounded-lg transition-colors duration-200 hover:bg-background-200 cursor-pointer"
+          onPress={() => handleEquipmentPress(equipment.id)}
         >
-          {equipment.images && equipment.images.length > 0 && (
-            <VStack className="h-48 w-48">
-              <Image
-                source={{
-                  uri: `${BASE_URL}/${equipment.images[0].original}`,
+          <HStack className="bg-background-100 m-2 p-3 rounded-lg transition-colors duration-200 hover:bg-background-200 cursor-pointer">
+            {equipment.images && equipment.images.length > 0 && (
+              <VStack className="h-48 w-48">
+                <Image
+                  source={{
+                    uri: `${BASE_URL}/${equipment.images[0].original}`,
+                  }}
+                  alt={equipment.name}
+                  className="h-full w-full"
+                  resizeMode="cover"
+                />
+              </VStack>
+            )}
+            <VStack className="pl-2 flex-1">
+              <Text className="text-lg font-bold">{equipment.name}</Text>
+              <Text>{equipment.pricePerDay} лв/ден</Text>
+              <Text className="text-sm text-gray-300 pt-2">
+                {equipment.description}
+              </Text>
+              <Button
+                variant="ghost"
+                size="sm"
+                onPress={(e: any) => {
+                  e?.stopPropagation?.();
+                  handleRemoveEquipment(equipment.id);
                 }}
-                alt={equipment.name}
-                className="h-full w-full"
-                resizeMode="cover"
-              />
+                className="bg-red-500 p-2 text-white self-start mt-2"
+              >
+                <TrashIcon width={16} height={16} className="text-white" />
+              </Button>
             </VStack>
-          )}
-          <VStack className="pl-2">
-            <Text className="text-lg font-bold">{equipment.name}</Text>
-            <Text>{equipment.pricePerDay} лв/ден</Text>
-            <Text className="text-sm text-gray-300 pt-2">
-              {equipment.description}
-            </Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={() => handleRemoveEquipment(equipment.id)}
-              className="bg-red-500 p-2 text-white"
-            >
-              <TrashIcon width={16} height={16} className="text-white" />
-            </Button>
-          </VStack>
-        </HStack>
+          </HStack>
+        </Pressable>
       ))}
 
       {/* Delete Confirmation Dialog */}

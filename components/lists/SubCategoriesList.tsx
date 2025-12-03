@@ -15,7 +15,7 @@ import { AppDispatch, RootState, deleteSubCategory, logout } from "@/store";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from "../ui/button";
+import { Button, ButtonText } from "../ui/button";
 import { EditIcon, TrashIcon } from "../ui/icon";
 import { Image } from "../ui/image";
 import { Pressable } from "../ui/pressable";
@@ -121,17 +121,10 @@ export default function SubCategoriesList() {
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md">
           <HStack className="items-center justify-between">
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={handleBackToCategories}
-              className="p-2 bg-background-100"
-            >
-              <Text className="text-typography-900 border-2 border-red-500 p-2 rounded-md">
-                Назад
-              </Text>
-              {/* <ArrowLeftIcon width={20} height={20} /> */}
+            <Button variant="outline" onPress={handleBackToCategories}>
+              <ButtonText>← Назад към Категории</ButtonText>
             </Button>
+
             <Heading size="xl" className="flex-1 text-center">
               Подкатегории
             </Heading>

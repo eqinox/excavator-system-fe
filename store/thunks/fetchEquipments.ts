@@ -88,4 +88,25 @@ const deleteEquipment = createAsyncThunk(
   }
 );
 
-export { createEquipment, deleteEquipment, fetchEquipmentsBySubCategoryId };
+const findEquipmentById = createAsyncThunk(
+  "equipments/findById",
+  async (equipmentId: string, { dispatch }) => {
+    const result = (await dispatch(
+      apiSlice.endpoints.authenticatedGet.initiate(`/equipment/${equipmentId}`)
+    )) as { data: EquipmentResponseDto } | { error: FetchBaseQueryError };
+
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
+    }
+  }
+);
+
+export {
+  createEquipment,
+  deleteEquipment,
+  fetchEquipmentsBySubCategoryId,
+  findEquipmentById,
+};

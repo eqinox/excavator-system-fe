@@ -4,6 +4,7 @@ import {
   createEquipment,
   deleteEquipment,
   fetchEquipmentsBySubCategoryId,
+  findEquipmentById,
 } from "../thunks/fetchEquipments";
 
 export interface EquipmentsState {
@@ -83,6 +84,23 @@ export const equipmentsSlice = createSlice({
     builder.addCase(deleteEquipment.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to delete equipment";
+      state.message = "";
+    });
+
+    // Find equipment by ID
+    builder.addCase(findEquipmentById.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+      state.message = "";
+    });
+    builder.addCase(findEquipmentById.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.selectedEquipment = action.payload as EquipmentResponseDto;
+      state.error = null;
+    });
+    builder.addCase(findEquipmentById.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch equipment";
       state.message = "";
     });
   },
