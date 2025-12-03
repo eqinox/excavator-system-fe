@@ -11,12 +11,12 @@ import CallbackHandlers from "./callback-type";
 
 // Interface for common callback parameters
 
-const fetchEquipmentsByCategoryId = createAsyncThunk(
-  "equipments/fetchByCategoryId",
-  async (categoryId: string, { dispatch }) => {
+const fetchEquipmentsBySubCategoryId = createAsyncThunk(
+  "equipments/fetchBySubCategoryId",
+  async (subCategoryId: string, { dispatch }) => {
     const result = (await dispatch(
       apiSlice.endpoints.authenticatedGet.initiate(
-        `/equipment/category/${categoryId}`
+        `/equipment/sub-category/${subCategoryId}`
       )
     )) as { data: EquipmentResponseDto[] } | { error: FetchBaseQueryError };
 
@@ -88,4 +88,4 @@ const deleteEquipment = createAsyncThunk(
   }
 );
 
-export { createEquipment, deleteEquipment, fetchEquipmentsByCategoryId };
+export { createEquipment, deleteEquipment, fetchEquipmentsBySubCategoryId };

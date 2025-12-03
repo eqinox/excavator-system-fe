@@ -16,7 +16,7 @@ import {
   AppDispatch,
   RootState,
   createEquipment,
-  fetchEquipmentsByCategoryId,
+  fetchEquipmentsBySubCategoryId,
 } from "@/store";
 import {
   equipmentSchema,
@@ -31,10 +31,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { Toast, ToastTitle, useToast } from "../ui/toast";
 
 interface EquipmentFormProps {
-  categoryId: string;
+  subCategoryId: string;
 }
 
-export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
+export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const toast = useToast();
@@ -53,11 +53,11 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
     resolver: zodResolver(equipmentSchema),
     mode: "onSubmit",
     defaultValues: {
-      category_id: categoryId,
+      subCategoryId: subCategoryId,
       name: "",
       description: "",
-      price_per_day: 0,
-      location_id: "",
+      pricePerDay: 0,
+      locationId: "",
       available: true,
       images: [],
     },
@@ -135,8 +135,8 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
           });
           reset();
           // Refetch equipments to ensure fresh data before redirect
-          dispatch(fetchEquipmentsByCategoryId(categoryId));
-          router.replace(`/equipments?id=${categoryId}`);
+          dispatch(fetchEquipmentsBySubCategoryId(subCategoryId));
+          router.replace(`/equipments?id=${subCategoryId}`);
         },
         onError: (message: string) => {
           toast.show({
@@ -239,7 +239,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                 </FormControl>
 
                 {/* Price Field */}
-                <FormControl isInvalid={!!getFieldError("price_per_day")}>
+                <FormControl isInvalid={!!getFieldError("pricePerDay")}>
                   <FormControlLabel>
                     <FormControlLabelText>
                       Цена на ден (лв.) *
@@ -247,7 +247,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                   </FormControlLabel>
                   <Controller
                     control={control}
-                    name="price_per_day"
+                    name="pricePerDay"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input>
                         <InputField
@@ -274,23 +274,23 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                       </Input>
                     )}
                   />
-                  {getFieldError("price_per_day") && (
+                  {getFieldError("pricePerDay") && (
                     <FormControlError>
                       <FormControlErrorText>
-                        {getFieldError("price_per_day")}
+                        {getFieldError("pricePerDay")}
                       </FormControlErrorText>
                     </FormControlError>
                   )}
                 </FormControl>
 
                 {/* Location Field */}
-                <FormControl isInvalid={!!getFieldError("location_id")}>
+                <FormControl isInvalid={!!getFieldError("locationId")}>
                   <FormControlLabel>
                     <FormControlLabelText>Локация *</FormControlLabelText>
                   </FormControlLabel>
                   <Controller
                     control={control}
-                    name="location_id"
+                    name="locationId"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <Input variant="outline" size="md">
                         <InputField
@@ -306,7 +306,7 @@ export default function EquipmentForm({ categoryId }: EquipmentFormProps) {
                   />
                   <FormControlError>
                     <FormControlErrorText>
-                      {getFieldError("location_id")}
+                      {getFieldError("locationId")}
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>

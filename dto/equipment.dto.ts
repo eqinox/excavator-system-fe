@@ -1,15 +1,15 @@
-import { ImageDto } from "./common.dto";
-
 export interface EquipmentResponseDto {
   id: string;
   name: string;
   description: string;
-  category_id: string;
-  price_per_day: number;
-  available?: boolean;
-  location_id: string;
+  subCategoryId: string;
+  pricePerDay: number;
+  available: boolean;
+  locationId: string;
   owner: string;
-  images: ImageDto[];
+  images: Array<{ original: string; small: string }>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface EquipmentDeleteResponseDto {

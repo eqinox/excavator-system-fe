@@ -11,14 +11,19 @@ import {
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { AppDispatch, RootState, createCategory, editCategory } from "@/store";
-// import { useCategories } from '@/redux/useReduxHooks';
 import {
-  categoryCreateSchema,
-  categoryUpdateSchema,
-  type CategoryCreateData,
-  type CategoryUpdateData,
-} from "@/validation/category";
+  AppDispatch,
+  RootState,
+  createSubCategory,
+  editSubCategory,
+  fetchSubCategories,
+} from "@/store";
+import {
+  subCategoryCreateSchema,
+  subCategoryUpdateSchema,
+  type SubCategoryCreateData,
+  type SubCategoryUpdateData,
+} from "@/validation/subCategory";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -29,33 +34,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { Input, InputField } from "../ui/input";
 import { Toast, ToastTitle, useToast } from "../ui/toast";
 
-interface CategoryFormProps {
+interface SubCategoryFormProps {
   mode?: "create" | "edit";
-  initialData?: CategoryUpdateData | CategoryCreateData;
+  initialData?: SubCategoryUpdateData | SubCategoryCreateData;
+  categoryId: string;
 }
 
-export default function CategoryForm({
+export default function SubCategoryForm({
   mode = "create",
   initialData,
-}: CategoryFormProps) {
+  categoryId,
+}: SubCategoryFormProps) {
   const dispatch = useDispatch<AppDispatch>();
   const params = useLocalSearchParams();
   const router = useRouter();
   const toast = useToast();
   const isLoading = useSelector(
-    (state: RootState) => state.categories.isLoading
+    (state: RootState) => state.subCategories.isLoading
   );
-  // const {
-  //   addCategory,
-  //   editCategory,
-  //   categoriesLoading,
-  //   categoriesError,
-  //   clearCategoriesError,
-  // } = useCategories();
   const isEditMode = mode === "edit" || params.mode === "edit";
-  console.log("CategoryForm rendered");
-  // Use different schemas based on mode
-  const schema = isEditMode ? categoryUpdateSchema : categoryCreateSchema;
+  const schema = isEditMode ? subCategoryUpdateSchema : subCategoryCreateSchema;
 
   const {
     control,
@@ -64,10 +62,13 @@ export default function CategoryForm({
     reset,
     setValue,
     watch,
-  } = useForm<CategoryUpdateData | CategoryCreateData>({
+  } = useForm<SubCategoryUpdateData | SubCategoryCreateData>({
     resolver: zodResolver(schema),
     defaultValues: initialData || {
-      name: "",
+      type: "",
+      minRange: 0,
+      maxRange: 0,
+      categoryId: categoryId,
       image: null,
     },
   });
@@ -77,21 +78,20 @@ export default function CategoryForm({
   // Set initial values if editing
   useEffect(() => {
     if (initialData) {
-      setValue("name", initialData.name);
+      setValue("type", initialData.type);
+      setValue("minRange", initialData.minRange);
+      setValue("maxRange", initialData.maxRange);
       if (isEditMode && "id" in initialData) {
         setValue("id", initialData.id);
       }
-      // Set the image value for both create and edit modes
       if (initialData.image) {
         setValue("image", initialData.image);
       }
+    } else {
+      // Set categoryId for create mode
+      setValue("categoryId", categoryId);
     }
-  }, [initialData, setValue, isEditMode]);
-
-  // Clear error when component mounts
-  // useEffect(() => {
-  //   clearCategoriesError();
-  // }, [clearCategoriesError]);
+  }, [initialData, setValue, isEditMode, categoryId]);
 
   const pickImage = async () => {
     try {
@@ -111,13 +111,17 @@ export default function CategoryForm({
     }
   };
 
-  const onSubmit = async (data: CategoryUpdateData | CategoryCreateData) => {
+  const onSubmit = async (
+    data: SubCategoryUpdateData | SubCategoryCreateData
+  ) => {
     if (isEditMode) {
-      const updateData = data as CategoryUpdateData;
+      const updateData = data as SubCategoryUpdateData;
       const img: any = (updateData as any).image;
       const payload: any = {
         id: updateData.id,
-        name: updateData.name,
+        type: updateData.type,
+        minRange: updateData.minRange,
+        maxRange: updateData.maxRange,
       };
 
       // Only add image if user selected a new one (has base64)
@@ -126,7 +130,7 @@ export default function CategoryForm({
       }
 
       dispatch(
-        editCategory({
+        editSubCategory({
           data: payload,
           onSuccess: (message: string) => {
             toast.show({
@@ -139,7 +143,8 @@ export default function CategoryForm({
               ),
             });
             reset();
-            router.replace("/categories");
+            dispatch(fetchSubCategories(categoryId));
+            router.replace(`/sub-category?id=${categoryId}`);
           },
           onError: (message: string) => {
             toast.show({
@@ -155,11 +160,8 @@ export default function CategoryForm({
         })
       );
     } else {
-      // const createdCategory = data as CategoryCreateData;
-      // createdCategory.image = createdCategory.image.uri;
-
-      const createdCategory = data as CategoryCreateData;
-      const img: any = (createdCategory as any).image;
+      const createdSubCategory = data as SubCategoryCreateData;
+      const img: any = (createdSubCategory as any).image;
 
       let base64Image: string | null = null;
       if (img && typeof img === "object" && img.base64) {
@@ -178,8 +180,12 @@ export default function CategoryForm({
       }
 
       dispatch(
-        createCategory({
-          data: { ...createdCategory, image: base64Image },
+        createSubCategory({
+          data: {
+            ...createdSubCategory,
+            categoryId: categoryId,
+            image: base64Image,
+          },
           onSuccess: (message: string) => {
             toast.show({
               placement: "top",
@@ -191,7 +197,8 @@ export default function CategoryForm({
               ),
             });
             reset();
-            router.replace("/categories");
+            dispatch(fetchSubCategories(categoryId));
+            router.replace(`/sub-category?id=${categoryId}`);
           },
           onError: (message: string) => {
             toast.show({
@@ -222,44 +229,126 @@ export default function CategoryForm({
             <Box className="mb-6 items-center">
               <Text className="mb-2 text-2xl font-bold text-typography-900">
                 {isEditMode
-                  ? "Редактиране на категория"
-                  : "Добавяне на категория"}
+                  ? "Редактиране на подкатегория"
+                  : "Добавяне на подкатегория"}
               </Text>
               <Text className="text-center text-typography-500">
                 {isEditMode
-                  ? "Редактирайте данните на категорията"
-                  : "Въведете данните за новата категория"}
+                  ? "Редактирайте данните на подкатегорията"
+                  : "Въведете данните за новата подкатегория"}
               </Text>
             </Box>
 
             <VStack space="md" className="w-full">
-              {/* Category Name Field */}
-              <FormControl isInvalid={!!getFieldError("name")}>
+              {/* Type Field */}
+              <FormControl isInvalid={!!getFieldError("type")}>
                 <FormControlLabel>
-                  <FormControlLabelText>
-                    Име на категорията
-                  </FormControlLabelText>
+                  <FormControlLabelText>Тип *</FormControlLabelText>
                 </FormControlLabel>
                 <Controller
                   control={control}
-                  name="name"
+                  name="type"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input>
                       <InputField
-                        placeholder="Въведете име на категорията"
+                        placeholder="Напр. Mini Excavator"
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
                         autoCapitalize="words"
-                        onSubmitEditing={() => handleSubmit(onSubmit)()}
+                        returnKeyType="next"
                       />
                     </Input>
                   )}
                 />
-                {getFieldError("name") && (
+                {getFieldError("type") && (
                   <FormControlError>
                     <FormControlErrorText>
-                      {getFieldError("name")}
+                      {getFieldError("type")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+              </FormControl>
+
+              {/* Min Range Field */}
+              <FormControl isInvalid={!!getFieldError("minRange")}>
+                <FormControlLabel>
+                  <FormControlLabelText>
+                    Минимален обхват *
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="minRange"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input>
+                      <InputField
+                        placeholder="0"
+                        value={value === 0 ? "" : value.toString()}
+                        onChangeText={(text) => {
+                          const numericText = text.replace(/[^0-9.]/g, "");
+                          const parts = numericText.split(".");
+                          const cleanText =
+                            parts.length > 2
+                              ? parts[0] + "." + parts.slice(1).join("")
+                              : numericText;
+                          const numericValue =
+                            cleanText === "" ? 0 : parseFloat(cleanText);
+                          onChange(numericValue);
+                        }}
+                        onBlur={onBlur}
+                        keyboardType="numeric"
+                        returnKeyType="next"
+                      />
+                    </Input>
+                  )}
+                />
+                {getFieldError("minRange") && (
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {getFieldError("minRange")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                )}
+              </FormControl>
+
+              {/* Max Range Field */}
+              <FormControl isInvalid={!!getFieldError("maxRange")}>
+                <FormControlLabel>
+                  <FormControlLabelText>
+                    Максимален обхват *
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="maxRange"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input>
+                      <InputField
+                        placeholder="10"
+                        value={value === 0 ? "" : value.toString()}
+                        onChangeText={(text) => {
+                          const numericText = text.replace(/[^0-9.]/g, "");
+                          const parts = numericText.split(".");
+                          const cleanText =
+                            parts.length > 2
+                              ? parts[0] + "." + parts.slice(1).join("")
+                              : numericText;
+                          const numericValue =
+                            cleanText === "" ? 0 : parseFloat(cleanText);
+                          onChange(numericValue);
+                        }}
+                        onBlur={onBlur}
+                        keyboardType="numeric"
+                        returnKeyType="next"
+                      />
+                    </Input>
+                  )}
+                />
+                {getFieldError("maxRange") && (
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {getFieldError("maxRange")}
                     </FormControlErrorText>
                   </FormControlError>
                 )}
@@ -269,7 +358,7 @@ export default function CategoryForm({
               <FormControl isInvalid={!!getFieldError("image")}>
                 <FormControlLabel>
                   <FormControlLabelText>
-                    Снимка на категорията
+                    Снимка на подкатегорията
                   </FormControlLabelText>
                 </FormControlLabel>
 
@@ -327,7 +416,7 @@ export default function CategoryForm({
                     ? "Обработване..."
                     : isEditMode
                       ? "Запази промените"
-                      : "Създай категория"}
+                      : "Създай подкатегория"}
                 </ButtonText>
               </Button>
             </VStack>
@@ -340,7 +429,7 @@ export default function CategoryForm({
                 className="mt-2"
                 onPress={() => {
                   reset();
-                  router.replace("/categories");
+                  router.replace(`/sub-category?id=${categoryId}`);
                 }}
               >
                 <ButtonText>Отказ</ButtonText>
@@ -352,3 +441,4 @@ export default function CategoryForm({
     </Box>
   );
 }
+

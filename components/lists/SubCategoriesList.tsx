@@ -10,38 +10,43 @@ import { Heading } from "@/components/ui/heading";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-// import { useAuth, useCategories } from '@/redux/useReduxHooks';
 import { BASE_URL } from "@/constants";
-import { useRouter } from "expo-router";
+import { AppDispatch, RootState, deleteSubCategory, logout } from "@/store";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState, deleteCategory, logout } from "../store";
-import { Button } from "./ui/button";
-import { EditIcon, TrashIcon } from "./ui/icon";
-import { Image } from "./ui/image";
-import { Pressable } from "./ui/pressable";
-import { Toast, ToastTitle, useToast } from "./ui/toast";
+import { Button } from "../ui/button";
+import { EditIcon, TrashIcon } from "../ui/icon";
+import { Image } from "../ui/image";
+import { Pressable } from "../ui/pressable";
+import { Toast, ToastTitle, useToast } from "../ui/toast";
 
-export default function CategoriesList() {
+export default function SubCategoriesList() {
   const router = useRouter();
   const toast = useToast();
   const dispatch = useDispatch<AppDispatch>();
-  // const { deleteCategory, categories } = useCategories();
+  const params = useLocalSearchParams();
 
   const user = useSelector((state: RootState) => state.auth.user);
-  const categories = useSelector(
-    (state: RootState) => state.categories.categories
+  const subCategories = useSelector(
+    (state: RootState) => state.subCategories.subCategories
   );
+  const categoryId = params.id as string;
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
-
-  const handleCategoryPress = (categoryId: string) => {
-    console.log("pressing category", categoryId);
+  const [subCategoryToDelete, setSubCategoryToDelete] = useState<string | null>(
+    null
+  );
+  console.log("loading sub categories", subCategories);
+  const handleSubCategoryPress = (subCategoryId: string) => {
     router.push({
-      pathname: "/sub-category",
-      params: { id: categoryId.toString() },
+      pathname: "/equipments",
+      params: { id: subCategoryId, categoryId: categoryId },
     });
+  };
+
+  const handleBackToCategories = () => {
+    router.push("/categories");
   };
 
   const handleLogout = async () => {
@@ -54,28 +59,31 @@ export default function CategoriesList() {
     );
   };
 
-  const handleAddCategory = () => {
-    router.push("/category/add");
-  };
-
-  const handleEditCategory = (categoryId: string) => {
+  const handleAddSubCategory = () => {
     router.push({
-      pathname: "/category/edit",
-      params: { id: categoryId },
+      pathname: "/sub-category/add",
+      params: { categoryId: categoryId },
     });
   };
 
-  const handleRemoveCategory = (categoryId: string) => {
-    setCategoryToDelete(categoryId);
+  const handleEditSubCategory = (subCategoryId: string) => {
+    router.push({
+      pathname: "/sub-category/edit",
+      params: { id: subCategoryId },
+    });
+  };
+
+  const handleRemoveSubCategory = (subCategoryId: string) => {
+    setSubCategoryToDelete(subCategoryId);
     setShowDeleteDialog(true);
   };
 
-  const confirmDeleteCategory = async () => {
-    if (!categoryToDelete) return;
+  const confirmDeleteSubCategory = async () => {
+    if (!subCategoryToDelete) return;
 
     dispatch(
-      deleteCategory({
-        categoryId: categoryToDelete,
+      deleteSubCategory({
+        subCategoryId: subCategoryToDelete,
         onSuccess: (message: string) => {
           toast.show({
             placement: "top",
@@ -86,7 +94,7 @@ export default function CategoriesList() {
               </Toast>
             ),
           });
-          cancelDeleteCategory();
+          cancelDeleteSubCategory();
         },
         onError: (message: string) => {
           toast.show({
@@ -103,9 +111,9 @@ export default function CategoriesList() {
     );
   };
 
-  const cancelDeleteCategory = () => {
+  const cancelDeleteSubCategory = () => {
     setShowDeleteDialog(false);
-    setCategoryToDelete(null);
+    setSubCategoryToDelete(null);
   };
 
   return (
@@ -113,8 +121,19 @@ export default function CategoriesList() {
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md">
           <HStack className="items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onPress={handleBackToCategories}
+              className="p-2 bg-background-100"
+            >
+              <Text className="text-typography-900 border-2 border-red-500 p-2 rounded-md">
+                Назад
+              </Text>
+              {/* <ArrowLeftIcon width={20} height={20} /> */}
+            </Button>
             <Heading size="xl" className="flex-1 text-center">
-              Категории
+              Подкатегории
             </Heading>
             <Button variant="outline" onPress={handleLogout} className="ml-4">
               <Text>Излез</Text>
@@ -124,18 +143,18 @@ export default function CategoriesList() {
 
         <VStack space="lg" className="w-full">
           <HStack space="md" className="flex-wrap justify-center">
-            {categories.map((category, index) => (
+            {subCategories.map((subCategory, index) => (
               <VStack key={index} space="sm" className="items-center">
                 <Pressable
                   className="bg-primary flex h-48 w-48 cursor-pointer items-center justify-center overflow-hidden rounded-lg shadow-md"
-                  onPress={() => handleCategoryPress(category.id)}
+                  onPress={() => handleSubCategoryPress(subCategory.id)}
                 >
-                  {category.image && (
+                  {subCategory.image && (
                     <Image
                       source={{
-                        uri: `${BASE_URL}/${category.image.small}`,
+                        uri: `${BASE_URL}/${subCategory.image.small}`,
                       }}
-                      alt={category.name}
+                      alt={subCategory.type}
                       className="h-full w-full"
                       resizeMode="cover"
                     />
@@ -146,7 +165,7 @@ export default function CategoriesList() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onPress={() => handleEditCategory(category.id)}
+                      onPress={() => handleEditSubCategory(subCategory.id)}
                       className="bg-yellow-500 p-2"
                     >
                       <EditIcon width={16} height={16} className="text-white" />
@@ -154,7 +173,7 @@ export default function CategoriesList() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onPress={() => handleRemoveCategory(category.id)}
+                      onPress={() => handleRemoveSubCategory(subCategory.id)}
                       className="bg-red-500 p-2 text-white"
                     >
                       <TrashIcon
@@ -166,22 +185,25 @@ export default function CategoriesList() {
                   </HStack>
                 )}
                 <Text className="max-w-24 text-center text-sm font-medium">
-                  {category.name}
+                  {subCategory.type}
+                </Text>
+                <Text className="max-w-24 text-center text-xs text-gray-400">
+                  {subCategory.minRange} - {subCategory.maxRange}
                 </Text>
               </VStack>
             ))}
-            {categories.length === 0 && (
+            {subCategories.length === 0 && (
               <Text className="text-center text-sm">
-                Няма налични категории
+                Няма налични подкатегории
               </Text>
             )}
             {user?.role === "admin" && (
               <Button
                 variant="outline"
-                onPress={handleAddCategory}
+                onPress={handleAddSubCategory}
                 className="ml-4"
               >
-                <Text>Добавяне на категория</Text>
+                <Text>Добавяне на подкатегория</Text>
               </Button>
             )}
           </HStack>
@@ -189,31 +211,31 @@ export default function CategoriesList() {
       </VStack>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog isOpen={showDeleteDialog} onClose={cancelDeleteCategory}>
+      <AlertDialog isOpen={showDeleteDialog} onClose={cancelDeleteSubCategory}>
         <AlertDialogBackdrop />
         <AlertDialogContent>
           <AlertDialogHeader>
             <Text className="text-lg font-semibold text-typography-900">
-              Изтриване на категория
+              Изтриване на подкатегория
             </Text>
           </AlertDialogHeader>
           <AlertDialogBody>
             <Text className="text-typography-600">
-              Сигурни ли сте, че искате да изтриете тази категория? Това
+              Сигурни ли сте, че искате да изтриете тази подкатегория? Това
               действие не може да бъде отменено.
             </Text>
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button
               variant="outline"
-              onPress={cancelDeleteCategory}
+              onPress={cancelDeleteSubCategory}
               className="mr-2"
             >
               <Text>Отказ</Text>
             </Button>
             <Button
               variant="solid"
-              onPress={confirmDeleteCategory}
+              onPress={confirmDeleteSubCategory}
               className="bg-red-500"
             >
               <Text className="text-white">Изтрий</Text>

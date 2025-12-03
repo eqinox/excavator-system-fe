@@ -4,11 +4,11 @@ import { z } from "zod";
 export const equipmentSchema = z.object({
   name: z.string().min(1, "Името на оборудването е задължително"),
   description: z.string().min(1, "Описанието е задължително"),
-  price_per_day: z
+  pricePerDay: z
     .number()
     .min(0.01, "Цената на ден трябва да бъде по-голяма от 0"),
-  location_id: z.string().min(1, "Локацията е задължителна"),
-  category_id: z.string().uuid("Невалиден ID на категорията"),
+  locationId: z.string().min(1, "Локацията е задължителна"),
+  subCategoryId: z.string().uuid("Невалиден ID на подкатегорията"),
   available: z.boolean(),
   images: z.array(z.any()).min(1, "Поне едно изображение е задължително"),
 });
@@ -30,12 +30,12 @@ export const validateEquipmentDescription = (
 };
 
 export const validateEquipmentPrice = (price: number): string | null => {
-  const result = equipmentSchema.shape.price_per_day.safeParse(price);
+  const result = equipmentSchema.shape.pricePerDay.safeParse(price);
   return result.success ? null : result.error.issues[0].message;
 };
 
 export const validateEquipmentLocation = (location: string): string | null => {
-  const result = equipmentSchema.shape.location_id.safeParse(location);
+  const result = equipmentSchema.shape.locationId.safeParse(location);
   return result.success ? null : result.error.issues[0].message;
 };
 

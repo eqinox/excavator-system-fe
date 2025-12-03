@@ -1,6 +1,10 @@
-import { LoginResponseDto, LogoutResponseDto } from "@/dto/auth.dto";
+import {
+  LoginResponseDto,
+  LogoutResponseDto,
+  RegisterResponseDto,
+} from "@/dto/auth.dto";
 import { handleFetchBaseQueryError } from "@/lib/helpers";
-import { LoginFormData } from "@/validation/authentication";
+import { LoginFormData, SignupFormData } from "@/validation/authentication";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { apiSlice } from "../slices/apiSlice";
@@ -15,6 +19,28 @@ const login = createAsyncThunk(
         data: loginData,
       })
     )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
+
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
+    }
+  }
+);
+
+const register = createAsyncThunk(
+  "auth/register",
+  async (signupData: SignupFormData, { dispatch }) => {
+    // Exclude confirmPassword when sending to API
+    const { confirmPassword, ...registerData } = signupData;
+
+    const result = (await dispatch(
+      apiSlice.endpoints.post.initiate({
+        url: "/auth/signup",
+        data: registerData,
+      })
+    )) as { data: RegisterResponseDto } | { error: FetchBaseQueryError };
 
     if ("data" in result) {
       return result.data;
@@ -60,4 +86,4 @@ export const initializeAuth = createAsyncThunk(
   }
 );
 
-export { login, logout };
+export { login, logout, register };

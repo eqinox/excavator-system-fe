@@ -3,14 +3,18 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
-import { AppDispatch, RootState, fetchEquipmentsByCategoryId } from "@/store";
+import {
+  AppDispatch,
+  RootState,
+  fetchEquipmentsBySubCategoryId,
+} from "@/store";
 // import { useEquipment } from '@/redux/useReduxHooks';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function Equipments() {
-  const { id } = useLocalSearchParams();
+  const { id, categoryId } = useLocalSearchParams();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { equipments, isLoading, error } = useSelector(
@@ -19,9 +23,9 @@ export default function Equipments() {
 
   useEffect(() => {
     if (id && typeof id === "string") {
-      dispatch(fetchEquipmentsByCategoryId(id));
+      dispatch(fetchEquipmentsBySubCategoryId(id));
     }
-  }, [id]);
+  }, [dispatch, id]);
   // const {
   //   getEquipmentById,
   //   equipmentLoading: loading,
@@ -40,13 +44,20 @@ export default function Equipments() {
     router.push({
       pathname: "/equipment/create",
       params: {
-        categoryId: id,
+        subCategoryId: id,
       },
     });
   };
 
-  const handleBackToCategories = () => {
-    router.push("/categories");
+  const handleBackToSubCategories = () => {
+    if (categoryId && typeof categoryId === "string") {
+      router.push({
+        pathname: "/sub-category",
+        params: { id: categoryId },
+      });
+    } else {
+      router.back();
+    }
   };
 
   return (
@@ -54,8 +65,8 @@ export default function Equipments() {
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md" className="mb-4 mt-4">
           <HStack className="justify-between">
-            <Button variant="outline" onPress={handleBackToCategories}>
-              <ButtonText>← Назад към категории</ButtonText>
+            <Button variant="outline" onPress={handleBackToSubCategories}>
+              <ButtonText>← Назад към подкатегории</ButtonText>
             </Button>
             <Button variant="outline" onPress={() => handleCreateEquipment()}>
               <ButtonText>Публикувай оборудване</ButtonText>
@@ -100,7 +111,7 @@ export default function Equipments() {
                     {selectedEquipment.description}
                   </Text>
                   <Text className='text-center text-sm font-bold text-green-600'>
-                    {selectedEquipment.price_per_day} лв/ден
+                    {selectedEquipment.pricePerDay} лв/ден
                   </Text>
                 </VStack>
               </HStack>

@@ -20,11 +20,11 @@ import {
 } from "@/validation/authentication";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import "../../store";
-import { AppDispatch, RootState, login } from "../../store";
+import { AppDispatch, RootState, login, register } from "../../store";
 
 export default function AuthenticationForm() {
   const isLoading = useSelector((state: RootState) => state.auth.isLoading);
@@ -58,13 +58,7 @@ export default function AuthenticationForm() {
     if (isLogin) {
       dispatch(login(data));
     } else {
-      // await register({
-      //   email: data.email,
-      //   password: data.password,
-      //   username: (data as SignupFormData).username || undefined,
-      // });
-      // After successful registration, you might want to auto-login
-      // or show a success message
+      dispatch(register(data as SignupFormData));
     }
   };
 

@@ -1,7 +1,7 @@
 import {
   CategoryDeleteResponseDto,
   CategoryResponseDto,
-} from "@/dto/server/category.dto";
+} from "@/dto/category.dto";
 import { handleFetchBaseQueryError } from "@/lib/helpers";
 import { CategoryCreateData, CategoryUpdateData } from "@/validation/category";
 import { createAsyncThunk } from "@reduxjs/toolkit";

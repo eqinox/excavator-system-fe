@@ -1,6 +1,11 @@
 import { UserDto } from "@/dto/auth.dto";
 import { createSlice } from "@reduxjs/toolkit";
-import { initializeAuth, login, logout } from "../thunks/fetchAuthentication";
+import {
+  initializeAuth,
+  login,
+  logout,
+  register,
+} from "../thunks/fetchAuthentication";
 
 export interface AuthState {
   token: string | null;
@@ -71,6 +76,22 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.isAuthenticated = false;
       state.error = action.error.message || "Login failed";
+    });
+
+    // Register cases
+    builder.addCase(register.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(register.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isAuthenticated = false;
+      state.error = null;
+    });
+    builder.addCase(register.rejected, (state, action) => {
+      state.isLoading = false;
+      state.isAuthenticated = false;
+      state.error = action.error.message || "Registration failed";
     });
 
     // Logout cases

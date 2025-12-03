@@ -1,14 +1,14 @@
-import CategoriesList from '@/components/CategoriesList';
-import { AppDispatch, fetchCategories } from '@/store';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import CategoriesList from "@/components/CategoriesList";
+import { AppDispatch, fetchCategories } from "@/store";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 // import { useCategories } from '@/redux/useReduxHooks';
 
-export default function CategoriesRoute() {
+export default function CategoriesPage() {
   const dispatch = useDispatch<AppDispatch>();
   // const { categoriesLoading, categoriesError, refreshCategories } =
   //   useCategories();
-  
+
   useEffect(() => {
     dispatch(fetchCategories());
   }, []);

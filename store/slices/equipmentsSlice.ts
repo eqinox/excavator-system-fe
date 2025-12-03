@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   createEquipment,
   deleteEquipment,
-  fetchEquipmentsByCategoryId,
+  fetchEquipmentsBySubCategoryId,
 } from "../thunks/fetchEquipments";
 
 export interface EquipmentsState {
@@ -28,21 +28,27 @@ export const equipmentsSlice = createSlice({
   reducers: {},
   extraReducers(builder) {
     // Fetch equipments
-    builder.addCase(fetchEquipmentsByCategoryId.pending, (state, action) => {
+    builder.addCase(fetchEquipmentsBySubCategoryId.pending, (state, action) => {
       state.isLoading = true;
       state.error = null;
       state.message = "";
     });
-    builder.addCase(fetchEquipmentsByCategoryId.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.equipments = action.payload as EquipmentResponseDto[];
-      state.error = null;
-    });
-    builder.addCase(fetchEquipmentsByCategoryId.rejected, (state, action) => {
-      state.isLoading = false;
-      state.error = action.error.message || "Failed to fetch equipments";
-      state.message = "";
-    });
+    builder.addCase(
+      fetchEquipmentsBySubCategoryId.fulfilled,
+      (state, action) => {
+        state.isLoading = false;
+        state.equipments = action.payload as EquipmentResponseDto[];
+        state.error = null;
+      }
+    );
+    builder.addCase(
+      fetchEquipmentsBySubCategoryId.rejected,
+      (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || "Failed to fetch equipments";
+        state.message = "";
+      }
+    );
 
     // Create equipment
     builder.addCase(createEquipment.pending, (state, action) => {
