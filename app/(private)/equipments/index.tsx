@@ -40,15 +40,6 @@ export default function Equipments() {
   //   }
   // }, [id]);
 
-  const handleCreateEquipment = () => {
-    router.push({
-      pathname: "/equipment/create",
-      params: {
-        subCategoryId: id,
-      },
-    });
-  };
-
   const handleBackToSubCategories = () => {
     if (categoryId && typeof categoryId === "string") {
       router.push({
@@ -67,9 +58,6 @@ export default function Equipments() {
           <HStack className="justify-between">
             <Button variant="outline" onPress={handleBackToSubCategories}>
               <ButtonText>← Назад към подкатегории</ButtonText>
-            </Button>
-            <Button variant="outline" onPress={() => handleCreateEquipment()}>
-              <ButtonText>Публикувай оборудване</ButtonText>
             </Button>
           </HStack>
         </VStack>

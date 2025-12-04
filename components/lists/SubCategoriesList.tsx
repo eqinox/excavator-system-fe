@@ -11,7 +11,7 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import { BASE_URL } from "@/constants";
-import { AppDispatch, RootState, deleteSubCategory, logout } from "@/store";
+import { AppDispatch, RootState, deleteSubCategory } from "@/store";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -47,23 +47,6 @@ export default function SubCategoriesList() {
 
   const handleBackToCategories = () => {
     router.push("/categories");
-  };
-
-  const handleLogout = async () => {
-    dispatch(
-      logout({
-        onSuccess: (message: string) => {
-          router.replace("/auth");
-        },
-      })
-    );
-  };
-
-  const handleAddSubCategory = () => {
-    router.push({
-      pathname: "/sub-category/add",
-      params: { categoryId: categoryId },
-    });
   };
 
   const handleEditSubCategory = (subCategoryId: string) => {
@@ -128,9 +111,6 @@ export default function SubCategoriesList() {
             <Heading size="xl" className="flex-1 text-center">
               Подкатегории
             </Heading>
-            <Button variant="outline" onPress={handleLogout} className="ml-4">
-              <Text>Излез</Text>
-            </Button>
           </HStack>
         </VStack>
 
@@ -189,15 +169,6 @@ export default function SubCategoriesList() {
               <Text className="text-center text-sm">
                 Няма налични подкатегории
               </Text>
-            )}
-            {user?.role === "admin" && (
-              <Button
-                variant="outline"
-                onPress={handleAddSubCategory}
-                className="ml-4"
-              >
-                <Text>Добавяне на подкатегория</Text>
-              </Button>
             )}
           </HStack>
         </VStack>

@@ -15,7 +15,7 @@ import { BASE_URL } from "@/constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState, deleteCategory, logout } from "../store";
+import { AppDispatch, RootState, deleteCategory } from "../store";
 import { Button } from "./ui/button";
 import { EditIcon, TrashIcon } from "./ui/icon";
 import { Image } from "./ui/image";
@@ -42,20 +42,6 @@ export default function CategoriesList() {
       pathname: "/sub-category",
       params: { id: categoryId.toString() },
     });
-  };
-
-  const handleLogout = async () => {
-    dispatch(
-      logout({
-        onSuccess: (message: string) => {
-          router.replace("/auth");
-        },
-      })
-    );
-  };
-
-  const handleAddCategory = () => {
-    router.push("/category/add");
   };
 
   const handleEditCategory = (categoryId: string) => {
@@ -116,9 +102,6 @@ export default function CategoriesList() {
             <Heading size="xl" className="flex-1 text-center">
               Категории
             </Heading>
-            <Button variant="outline" onPress={handleLogout} className="ml-4">
-              <Text>Излез</Text>
-            </Button>
           </HStack>
         </VStack>
 
@@ -174,15 +157,6 @@ export default function CategoriesList() {
               <Text className="text-center text-sm">
                 Няма налични категории
               </Text>
-            )}
-            {user?.role === "admin" && (
-              <Button
-                variant="outline"
-                onPress={handleAddCategory}
-                className="ml-4"
-              >
-                <Text>Добавяне на категория</Text>
-              </Button>
             )}
           </HStack>
         </VStack>

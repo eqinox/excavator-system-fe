@@ -4,10 +4,12 @@ import { useLocalSearchParams } from "expo-router";
 export default function AddSubCategory() {
   const { categoryId } = useLocalSearchParams();
 
-  if (!categoryId || typeof categoryId !== "string") {
-    return null;
-  }
-
-  return <SubCategoryForm mode="create" categoryId={categoryId} />;
+  return (
+    <SubCategoryForm
+      mode="create"
+      categoryId={
+        categoryId && typeof categoryId === "string" ? categoryId : undefined
+      }
+    />
+  );
 }
-

@@ -9,6 +9,17 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
+import {
+  Select,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectInput,
+  SelectItem,
+  SelectPortal,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -16,6 +27,7 @@ import {
   RootState,
   createSubCategory,
   editSubCategory,
+  fetchCategories,
   fetchSubCategories,
 } from "@/store";
 import {
@@ -37,7 +49,7 @@ import { Toast, ToastTitle, useToast } from "../ui/toast";
 interface SubCategoryFormProps {
   mode?: "create" | "edit";
   initialData?: SubCategoryUpdateData | SubCategoryCreateData;
-  categoryId: string;
+  categoryId?: string;
 }
 
 export default function SubCategoryForm({
@@ -52,8 +64,15 @@ export default function SubCategoryForm({
   const isLoading = useSelector(
     (state: RootState) => state.subCategories.isLoading
   );
+  const categories = useSelector(
+    (state: RootState) => state.categories.categories
+  );
   const isEditMode = mode === "edit" || params.mode === "edit";
   const schema = isEditMode ? subCategoryUpdateSchema : subCategoryCreateSchema;
+
+  // Get categoryId from params if not provided as prop
+  const categoryIdFromParams = params.categoryId as string | undefined;
+  const finalCategoryId = categoryId || categoryIdFromParams;
 
   const {
     control,
@@ -68,12 +87,20 @@ export default function SubCategoryForm({
       type: "",
       minRange: 0,
       maxRange: 0,
-      categoryId: categoryId,
+      categoryId: finalCategoryId || "",
       image: null,
     },
   });
 
   const selectedImage = watch("image");
+  const selectedCategoryId = watch("categoryId");
+
+  // Fetch categories on mount for create mode
+  useEffect(() => {
+    if (!isEditMode) {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, isEditMode]);
 
   // Set initial values if editing
   useEffect(() => {
@@ -87,11 +114,14 @@ export default function SubCategoryForm({
       if (initialData.image) {
         setValue("image", initialData.image);
       }
-    } else {
-      // Set categoryId for create mode
-      setValue("categoryId", categoryId);
+      if ("categoryId" in initialData && initialData.categoryId) {
+        setValue("categoryId", initialData.categoryId);
+      }
+    } else if (finalCategoryId) {
+      // Set categoryId for create mode if provided
+      setValue("categoryId", finalCategoryId);
     }
-  }, [initialData, setValue, isEditMode, categoryId]);
+  }, [initialData, setValue, isEditMode, finalCategoryId]);
 
   const pickImage = async () => {
     try {
@@ -197,8 +227,14 @@ export default function SubCategoryForm({
               ),
             });
             reset();
-            dispatch(fetchSubCategories(categoryId));
-            router.replace(`/sub-category?id=${categoryId}`);
+            dispatch(fetchSubCategories(finalCategoryId || ""));
+            router.push({
+              pathname: "/sub-category/success",
+              params: {
+                type: createdSubCategory.type,
+                categoryId: finalCategoryId || "",
+              },
+            });
           },
           onError: (message: string) => {
             toast.show({
@@ -240,6 +276,59 @@ export default function SubCategoryForm({
             </Box>
 
             <VStack space="md" className="w-full">
+              {/* Category Field - Only in create mode */}
+              {!isEditMode && (
+                <FormControl isInvalid={!!getFieldError("categoryId")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>Категория *</FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="categoryId"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        selectedValue={value}
+                        onValueChange={(selectedValue) => {
+                          onChange(selectedValue);
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectInput
+                            placeholder="Избери категория"
+                            value={
+                              categories.find((cat) => cat.id === value)
+                                ?.name || ""
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectPortal>
+                          <SelectBackdrop />
+                          <SelectContent>
+                            <SelectDragIndicatorWrapper>
+                              <SelectDragIndicator />
+                            </SelectDragIndicatorWrapper>
+                            {categories.map((category) => (
+                              <SelectItem
+                                key={category.id}
+                                label={category.name}
+                                value={category.id}
+                              />
+                            ))}
+                          </SelectContent>
+                        </SelectPortal>
+                      </Select>
+                    )}
+                  />
+                  {getFieldError("categoryId") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("categoryId")}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  )}
+                </FormControl>
+              )}
+
               {/* Type Field */}
               <FormControl isInvalid={!!getFieldError("type")}>
                 <FormControlLabel>
@@ -441,4 +530,3 @@ export default function SubCategoryForm({
     </Box>
   );
 }
-

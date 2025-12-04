@@ -10,13 +10,25 @@ import {
 } from "@/components/ui/form-control";
 import { HStack } from "@/components/ui/hstack";
 import { Input, InputField } from "@/components/ui/input";
+import {
+  Select,
+  SelectBackdrop,
+  SelectContent,
+  SelectDragIndicator,
+  SelectDragIndicatorWrapper,
+  SelectInput,
+  SelectItem,
+  SelectPortal,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 import {
   AppDispatch,
   RootState,
   createEquipment,
-  fetchEquipmentsBySubCategoryId,
+  fetchCategories,
+  fetchSubCategories,
 } from "@/store";
 import {
   equipmentSchema,
@@ -25,13 +37,14 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Pressable, Image as RNImage, ScrollView } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Toast, ToastTitle, useToast } from "../ui/toast";
 
 interface EquipmentFormProps {
-  subCategoryId: string;
+  subCategoryId?: string;
 }
 
 export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
@@ -41,6 +54,15 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
   const isLoading = useSelector(
     (state: RootState) => state.equipments.isLoading
   );
+  const categories = useSelector(
+    (state: RootState) => state.categories.categories
+  );
+  const subCategories = useSelector(
+    (state: RootState) => state.subCategories.subCategories
+  );
+
+  // Local state for category selection (used only for filtering subcategories)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const {
     control,
@@ -53,7 +75,7 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
     resolver: zodResolver(equipmentSchema),
     mode: "onSubmit",
     defaultValues: {
-      subCategoryId: subCategoryId,
+      subCategoryId: subCategoryId || "",
       name: "",
       description: "",
       pricePerDay: 0,
@@ -64,6 +86,39 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
   });
 
   const selectedImages = watch("images");
+  const selectedSubCategoryId = watch("subCategoryId");
+
+  // Filter subcategories by selected category
+  const filteredSubCategories = subCategories.filter(
+    (subCat) => subCat.categoryId === selectedCategoryId
+  );
+
+  // Fetch categories on mount
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  // Fetch subcategories when category is selected
+  useEffect(() => {
+    if (selectedCategoryId) {
+      dispatch(fetchSubCategories(selectedCategoryId));
+      // Clear subcategory selection when category changes
+      setValue("subCategoryId", "");
+    } else {
+      // Clear subcategory selection if no category is selected
+      setValue("subCategoryId", "");
+    }
+  }, [selectedCategoryId, dispatch, setValue]);
+
+  // If subCategoryId prop is provided, find its category and set it
+  useEffect(() => {
+    if (subCategoryId && subCategories.length > 0) {
+      const subCat = subCategories.find((sc) => sc.id === subCategoryId);
+      if (subCat && subCat.categoryId) {
+        setSelectedCategoryId(subCat.categoryId);
+      }
+    }
+  }, [subCategoryId, subCategories]);
 
   const pickImages = async () => {
     try {
@@ -120,6 +175,7 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
       });
     }
 
+    // Prepare data for submission (categoryId is not included as it's only for filtering)
     dispatch(
       createEquipment({
         data: { ...equipmentData, images: processedImages },
@@ -134,9 +190,13 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
             ),
           });
           reset();
-          // Refetch equipments to ensure fresh data before redirect
-          dispatch(fetchEquipmentsBySubCategoryId(subCategoryId));
-          router.replace(`/equipments?id=${subCategoryId}`);
+          router.push({
+            pathname: "/equipment/success",
+            params: {
+              name: data.name,
+              subCategoryId: data.subCategoryId || "",
+            },
+          });
         },
         onError: (message: string) => {
           toast.show({
@@ -278,6 +338,105 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
                     <FormControlError>
                       <FormControlErrorText>
                         {getFieldError("pricePerDay")}
+                      </FormControlErrorText>
+                    </FormControlError>
+                  )}
+                </FormControl>
+
+                {/* Category Field */}
+                <FormControl>
+                  <FormControlLabel>
+                    <FormControlLabelText>Категория *</FormControlLabelText>
+                  </FormControlLabel>
+                  <Select
+                    selectedValue={selectedCategoryId}
+                    onValueChange={(selectedValue) => {
+                      setSelectedCategoryId(selectedValue);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectInput
+                        placeholder="Избери категория"
+                        value={
+                          categories.find(
+                            (cat) => cat.id === selectedCategoryId
+                          )?.name || ""
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectPortal>
+                      <SelectBackdrop />
+                      <SelectContent>
+                        <SelectDragIndicatorWrapper>
+                          <SelectDragIndicator />
+                        </SelectDragIndicatorWrapper>
+                        {categories.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            label={category.name}
+                            value={category.id}
+                          />
+                        ))}
+                      </SelectContent>
+                    </SelectPortal>
+                  </Select>
+                </FormControl>
+
+                {/* SubCategory Field */}
+                <FormControl isInvalid={!!getFieldError("subCategoryId")}>
+                  <FormControlLabel>
+                    <FormControlLabelText>Подкатегория *</FormControlLabelText>
+                  </FormControlLabel>
+                  <Controller
+                    control={control}
+                    name="subCategoryId"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        key={selectedCategoryId || "no-category"}
+                        selectedValue={value}
+                        onValueChange={(selectedValue) => {
+                          onChange(selectedValue);
+                        }}
+                        isDisabled={!selectedCategoryId}
+                      >
+                        <SelectTrigger>
+                          <SelectInput
+                            placeholder={
+                              !selectedCategoryId
+                                ? "Първо изберете категория"
+                                : filteredSubCategories.length === 0
+                                  ? "Зареждане..."
+                                  : "Избери подкатегория"
+                            }
+                            value={
+                              filteredSubCategories.find(
+                                (subCat) => subCat.id === value
+                              )?.type || ""
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectPortal>
+                          <SelectBackdrop />
+                          <SelectContent>
+                            <SelectDragIndicatorWrapper>
+                              <SelectDragIndicator />
+                            </SelectDragIndicatorWrapper>
+                            {filteredSubCategories.map((subCategory) => (
+                              <SelectItem
+                                key={subCategory.id}
+                                label={subCategory.type}
+                                value={subCategory.id}
+                              />
+                            ))}
+                          </SelectContent>
+                        </SelectPortal>
+                      </Select>
+                    )}
+                  />
+                  {getFieldError("subCategoryId") && (
+                    <FormControlError>
+                      <FormControlErrorText>
+                        {getFieldError("subCategoryId")}
                       </FormControlErrorText>
                     </FormControlError>
                   )}

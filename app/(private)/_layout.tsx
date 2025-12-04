@@ -1,7 +1,9 @@
-import { RootState } from '@/store';
-import { Redirect, Slot } from 'expo-router';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import UserMenu from "@/components/UserMenu";
+import { Box } from "@/components/ui/box";
+import { RootState } from "@/store";
+import { Redirect, Slot } from "expo-router";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
 export default function PrivateLayout() {
   const isAuthenticated = useSelector((state: RootState) => {
@@ -14,8 +16,13 @@ export default function PrivateLayout() {
 
   if (!isAuthenticated) {
     // If not authenticated, redirect to auth screen
-    return <Redirect href='/(public)/auth' />;
+    return <Redirect href="/(public)/auth" />;
   }
-  
-  return <Slot />;
+
+  return (
+    <Box className="flex-1 relative">
+      <UserMenu />
+      <Slot />
+    </Box>
+  );
 }

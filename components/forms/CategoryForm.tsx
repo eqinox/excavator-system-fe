@@ -191,7 +191,10 @@ export default function CategoryForm({
               ),
             });
             reset();
-            router.replace("/categories");
+            router.push({
+              pathname: "/category/success",
+              params: { name: createdCategory.name },
+            });
           },
           onError: (message: string) => {
             toast.show({

@@ -3,7 +3,15 @@ import { useLocalSearchParams } from "expo-router";
 
 const CreateEquipment = () => {
   const { subCategoryId } = useLocalSearchParams();
-  return <EquipmentForm subCategoryId={subCategoryId as string} />;
+  return (
+    <EquipmentForm
+      subCategoryId={
+        subCategoryId && typeof subCategoryId === "string"
+          ? subCategoryId
+          : undefined
+      }
+    />
+  );
 };
 
 export default CreateEquipment;
