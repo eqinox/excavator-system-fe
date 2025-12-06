@@ -23,12 +23,15 @@ import {
 } from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { BASE_URL } from "@/constants";
+import { EquipmentResponseDto } from "@/dto/equipment.dto";
 import {
   AppDispatch,
   RootState,
   createEquipment,
   fetchCategories,
   fetchSubCategories,
+  updateEquipment,
 } from "@/store";
 import {
   equipmentSchema,
@@ -45,9 +48,15 @@ import { Toast, ToastTitle, useToast } from "../ui/toast";
 
 interface EquipmentFormProps {
   subCategoryId?: string;
+  mode?: "create" | "edit";
+  initialData?: EquipmentResponseDto;
 }
 
-export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
+export default function EquipmentForm({
+  subCategoryId,
+  mode = "create",
+  initialData,
+}: EquipmentFormProps) {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const toast = useToast();
@@ -64,6 +73,8 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
   // Local state for category selection (used only for filtering subcategories)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
+  const isEditMode = mode === "edit";
+
   const {
     control,
     handleSubmit,
@@ -75,13 +86,17 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
     resolver: zodResolver(equipmentSchema),
     mode: "onSubmit",
     defaultValues: {
-      subCategoryId: subCategoryId || "",
-      name: "",
-      description: "",
-      pricePerDay: 0,
-      locationId: "",
-      available: true,
-      images: [],
+      subCategoryId: initialData?.subCategoryId || subCategoryId || "",
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      pricePerDay: initialData?.pricePerDay || 0,
+      locationId: initialData?.locationId || "",
+      available: initialData?.available ?? true,
+      images:
+        initialData?.images?.map((img) => ({
+          uri: `${BASE_URL}/${img.original}`,
+          isExisting: true,
+        })) || [],
     },
   });
 
@@ -120,6 +135,18 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
     }
   }, [subCategoryId, subCategories]);
 
+  // Set initial category when in edit mode
+  useEffect(() => {
+    if (isEditMode && initialData?.subCategoryId && subCategories.length > 0) {
+      const subCat = subCategories.find(
+        (sc) => sc.id === initialData.subCategoryId
+      );
+      if (subCat && subCat.categoryId) {
+        setSelectedCategoryId(subCat.categoryId);
+      }
+    }
+  }, [isEditMode, initialData, subCategories]);
+
   const pickImages = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -153,6 +180,12 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
       images.forEach((img: any) => {
         let base64Image: string | null = null;
 
+        // Skip existing images (they have isExisting flag)
+        if (img && typeof img === "object" && img.isExisting) {
+          // Don't include existing images in the update - they're already on the server
+          return;
+        }
+
         if (img && typeof img === "object" && img.base64) {
           base64Image = img.base64 as string;
         } else if (
@@ -175,42 +208,75 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
       });
     }
 
-    // Prepare data for submission (categoryId is not included as it's only for filtering)
-    dispatch(
-      createEquipment({
-        data: { ...equipmentData, images: processedImages },
-        onSuccess: (message: string) => {
-          toast.show({
-            placement: "top",
-            duration: 3000,
-            render: ({ id }) => (
-              <Toast action="success" variant="solid">
-                <ToastTitle>{message}</ToastTitle>
-              </Toast>
-            ),
-          });
-          reset();
-          router.push({
-            pathname: "/equipment/success",
-            params: {
-              name: data.name,
-              subCategoryId: data.subCategoryId || "",
-            },
-          });
-        },
-        onError: (message: string) => {
-          toast.show({
-            placement: "top",
-            duration: 3000,
-            render: ({ id }) => (
-              <Toast action="error" variant="solid">
-                <ToastTitle>{message}</ToastTitle>
-              </Toast>
-            ),
-          });
-        },
-      })
-    );
+    if (isEditMode && initialData) {
+      // Update equipment
+      dispatch(
+        updateEquipment({
+          equipmentId: initialData.id,
+          data: { ...equipmentData, images: processedImages },
+          onSuccess: (message: string) => {
+            toast.show({
+              placement: "top",
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action="success" variant="solid">
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+            router.back();
+          },
+          onError: (message: string) => {
+            toast.show({
+              placement: "top",
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action="error" variant="solid">
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+          },
+        })
+      );
+    } else {
+      // Create equipment
+      dispatch(
+        createEquipment({
+          data: { ...equipmentData, images: processedImages },
+          onSuccess: (message: string) => {
+            toast.show({
+              placement: "top",
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action="success" variant="solid">
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+            reset();
+            router.push({
+              pathname: "/equipment/success",
+              params: {
+                name: data.name,
+                subCategoryId: data.subCategoryId || "",
+              },
+            });
+          },
+          onError: (message: string) => {
+            toast.show({
+              placement: "top",
+              duration: 3000,
+              render: ({ id }) => (
+                <Toast action="error" variant="solid">
+                  <ToastTitle>{message}</ToastTitle>
+                </Toast>
+              ),
+            });
+          },
+        })
+      );
+    }
   };
 
   // Type-safe error access
@@ -227,10 +293,14 @@ export default function EquipmentForm({ subCategoryId }: EquipmentFormProps) {
               {/* Header */}
               <Box className="mb-6 items-center">
                 <Text className="mb-2 text-2xl font-bold text-typography-900">
-                  Публикувай оборудване
+                  {isEditMode
+                    ? "Редактирай оборудване"
+                    : "Публикувай оборудване"}
                 </Text>
                 <Text className="text-center text-typography-500">
-                  Въведете данните за новото оборудване
+                  {isEditMode
+                    ? "Обновете данните за оборудването"
+                    : "Въведете данните за новото оборудване"}
                 </Text>
               </Box>
 

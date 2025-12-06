@@ -104,9 +104,61 @@ const findEquipmentById = createAsyncThunk(
   }
 );
 
+const fetchEquipmentsByOwnerId = createAsyncThunk(
+  "equipments/fetchByOwnerId",
+  async (ownerId: string, { dispatch }) => {
+    const result = (await dispatch(
+      apiSlice.endpoints.authenticatedGet.initiate(
+        `/equipment/owner/${ownerId}`
+      )
+    )) as { data: EquipmentResponseDto[] } | { error: FetchBaseQueryError };
+
+    if ("data" in result) {
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      throw new Error(errorMessage);
+    }
+  }
+);
+
+const updateEquipment = createAsyncThunk(
+  "equipments/update",
+  async (
+    {
+      equipmentId,
+      data,
+      onSuccess,
+      onError,
+    }: {
+      equipmentId: string;
+      data: EquipmentFormData;
+    } & CallbackHandlers,
+    { dispatch }
+  ) => {
+    const result = (await dispatch(
+      apiSlice.endpoints.authenticatedPut.initiate({
+        url: `/equipment/${equipmentId}`,
+        data: JSON.stringify(data),
+      })
+    )) as { data: EquipmentResponseDto } | { error: FetchBaseQueryError };
+
+    if ("data" in result) {
+      onSuccess?.("Оборудването е обновено успешно");
+      return result.data;
+    } else if ("error" in result) {
+      const errorMessage = handleFetchBaseQueryError(result.error);
+      onError?.(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+);
+
 export {
   createEquipment,
   deleteEquipment,
+  fetchEquipmentsByOwnerId,
   fetchEquipmentsBySubCategoryId,
   findEquipmentById,
+  updateEquipment,
 };

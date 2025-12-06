@@ -7,9 +7,8 @@ import { useDispatch } from "react-redux";
 export default function SubCategoryPage() {
   const dispatch = useDispatch<AppDispatch>();
   const { id } = useLocalSearchParams();
-  console.log("sub category page", id);
+
   useEffect(() => {
-    console.log("fetching sub categories use effect");
     dispatch(fetchSubCategories(id as string));
   }, [dispatch, id]);
 

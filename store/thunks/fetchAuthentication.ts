@@ -19,7 +19,7 @@ const login = createAsyncThunk(
         data: loginData,
       })
     )) as { data: LoginResponseDto } | { error: FetchBaseQueryError };
-
+    console.log("result", result);
     if ("data" in result) {
       return result.data;
     } else if ("error" in result) {

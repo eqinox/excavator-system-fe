@@ -11,16 +11,16 @@ import { HStack } from "@/components/ui/hstack";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
 // import { useAuth, useCategories } from '@/redux/useReduxHooks';
+import { Button, ButtonText } from "@/components/ui/button";
+import { EditIcon, TrashIcon } from "@/components/ui/icon";
+import { Image } from "@/components/ui/image";
+import { Pressable } from "@/components/ui/pressable";
+import { Toast, ToastTitle, useToast } from "@/components/ui/toast";
 import { BASE_URL } from "@/constants";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState, deleteCategory } from "../store";
-import { Button } from "./ui/button";
-import { EditIcon, TrashIcon } from "./ui/icon";
-import { Image } from "./ui/image";
-import { Pressable } from "./ui/pressable";
-import { Toast, ToastTitle, useToast } from "./ui/toast";
 
 export default function CategoriesList() {
   const router = useRouter();
@@ -37,7 +37,6 @@ export default function CategoriesList() {
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
   const handleCategoryPress = (categoryId: string) => {
-    console.log("pressing category", categoryId);
     router.push({
       pathname: "/sub-category",
       params: { id: categoryId.toString() },
@@ -95,7 +94,7 @@ export default function CategoriesList() {
   };
 
   return (
-    <VStack className="flex-1 justify-start bg-background-100 px-4">
+    <>
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md">
           <HStack className="items-center justify-between">
@@ -183,18 +182,18 @@ export default function CategoriesList() {
               onPress={cancelDeleteCategory}
               className="mr-2"
             >
-              <Text>Отказ</Text>
+              <ButtonText>Отказ</ButtonText>
             </Button>
             <Button
               variant="solid"
               onPress={confirmDeleteCategory}
               className="bg-red-500"
             >
-              <Text className="text-white">Изтрий</Text>
+              <ButtonText className="text-white">Изтрий</ButtonText>
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </VStack>
+    </>
   );
 }

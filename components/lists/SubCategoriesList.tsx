@@ -37,7 +37,7 @@ export default function SubCategoriesList() {
   const [subCategoryToDelete, setSubCategoryToDelete] = useState<string | null>(
     null
   );
-  console.log("loading sub categories", subCategories);
+
   const handleSubCategoryPress = (subCategoryId: string) => {
     router.push({
       pathname: "/equipments",
@@ -100,7 +100,7 @@ export default function SubCategoriesList() {
   };
 
   return (
-    <VStack className="flex-1 justify-start bg-background-100 px-4">
+    <>
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md">
           <HStack className="items-center justify-between">
@@ -115,7 +115,7 @@ export default function SubCategoriesList() {
         </VStack>
 
         <VStack space="lg" className="w-full">
-          <HStack space="md" className="flex-wrap justify-center">
+          <HStack space="md" className="flex-wrap justify-between">
             {subCategories.map((subCategory, index) => (
               <VStack key={index} space="sm" className="items-center">
                 <Pressable
@@ -207,6 +207,6 @@ export default function SubCategoriesList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </VStack>
+    </>
   );
 }

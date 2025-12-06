@@ -5,14 +5,14 @@ import { MoonIcon, SunIcon } from "@/components/ui/icon";
 import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { ThemeMode } from "@/constants";
+import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import "@/global.css";
-import { useTheme } from "@/hooks/useTheme";
 import { AppDispatch, RootState, initializeAuth, store } from "@/store";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 // import AppLoading from 'expo-app-loading';
 import { useFonts } from "expo-font";
@@ -58,7 +58,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <RootLayoutNav />
+        <ThemeProvider>
+          <RootLayoutNav />
+        </ThemeProvider>
       </Provider>
     </SafeAreaProvider>
   );
@@ -88,7 +90,7 @@ function RootLayoutNav() {
   if (isLoading || !authInitialized) {
     return (
       <GluestackUIProvider mode={colorMode}>
-        <ThemeProvider
+        <NavigationThemeProvider
           value={colorMode === ThemeMode.DARK ? DarkTheme : DefaultTheme}
         >
           <SafeAreaView style={{ flex: 1 }}>
@@ -97,30 +99,34 @@ function RootLayoutNav() {
               <Text className="mt-4">Loading...</Text>
             </Center>
           </SafeAreaView>
-        </ThemeProvider>
+        </NavigationThemeProvider>
       </GluestackUIProvider>
     );
   }
   return (
     <GluestackUIProvider mode={colorMode}>
-      <ThemeProvider
+      <NavigationThemeProvider
         value={colorMode === ThemeMode.DARK ? DarkTheme : DefaultTheme}
       >
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} className="bg-background-300">
           <Slot />
-          <Fab
-            onPress={() =>
-              handleThemeChange(
-                colorMode === ThemeMode.DARK ? ThemeMode.LIGHT : ThemeMode.DARK
-              )
-            }
-            className="m-6"
-            size="lg"
-          >
-            <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
-          </Fab>
+          {!isAuthenticated && (
+            <Fab
+              onPress={() =>
+                handleThemeChange(
+                  colorMode === ThemeMode.DARK
+                    ? ThemeMode.LIGHT
+                    : ThemeMode.DARK
+                )
+              }
+              className="m-6"
+              size="lg"
+            >
+              <FabIcon as={colorMode === ThemeMode.DARK ? MoonIcon : SunIcon} />
+            </Fab>
+          )}
         </SafeAreaView>
-      </ThemeProvider>
+      </NavigationThemeProvider>
     </GluestackUIProvider>
   );
 }

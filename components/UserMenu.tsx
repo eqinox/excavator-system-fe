@@ -1,10 +1,15 @@
 import { Box } from "@/components/ui/box";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { HStack } from "@/components/ui/hstack";
+import { MoonIcon, SunIcon } from "@/components/ui/icon";
 import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 import { VStack } from "@/components/ui/vstack";
+import { ThemeMode } from "@/constants";
+import { useTheme } from "@/contexts/ThemeContext";
 import { AppDispatch, RootState, fetchCategories, logout } from "@/store";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,6 +23,7 @@ import {
 } from "./ui/alert-dialog";
 
 export default function UserMenu() {
+  const { colorMode, handleThemeChange } = useTheme();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
@@ -46,6 +52,10 @@ export default function UserMenu() {
 
   const handleAddEquipment = () => {
     router.push("/equipment/create");
+  };
+
+  const handleMyEquipments = () => {
+    router.push("/my-equipments");
   };
 
   const handleAddCategory = () => {
@@ -83,63 +93,127 @@ export default function UserMenu() {
           onPress={() => setShowMenu(false)}
         />
       )}
-      <Box className="absolute top-4 right-4 z-50">
-        <Button variant="outline" onPress={() => setShowMenu(!showMenu)}>
-          <ButtonText>{displayName}</ButtonText>
-        </Button>
+      <Box className="relative z-50">
+        <Pressable
+          onPress={() => setShowMenu(!showMenu)}
+          className="items-center justify-center"
+        >
+          <VStack space="xs" className="items-center">
+            <MaterialIcons
+              name="account-circle"
+              size={24}
+              color={showMenu ? "#3b82f6" : "#6b7280"}
+            />
+            <Text
+              className={`text-xs ${
+                showMenu
+                  ? "text-primary-600 font-semibold"
+                  : "text-typography-500"
+              }`}
+            >
+              Потребител
+            </Text>
+          </VStack>
+        </Pressable>
         {showMenu && (
-          <Card className="absolute top-12 right-0 mt-2 min-w-[200px] bg-background-0 border border-outline-100 shadow-lg">
-            <VStack space="xs" className="p-1">
-              <Pressable
-                onPress={() => {
-                  setShowMenu(false);
-                  handleAddEquipment();
-                }}
-                className="p-3 rounded active:bg-background-50"
-              >
-                <Text className="text-typography-700">
-                  Добавяне на оборудване
-                </Text>
-              </Pressable>
-              {user.role === "admin" && (
-                <>
-                  <Box className="h-px w-full bg-background-200" />
-                  <Pressable
-                    onPress={() => {
-                      setShowMenu(false);
-                      handleAddCategory();
-                    }}
-                    className="p-3 rounded active:bg-background-50"
-                  >
+          <Box
+            className="absolute bottom-12 mb-2 w-full items-center z-[60]"
+            style={{ left: 0, right: 0 }}
+          >
+            <Card className="min-w-[200px] bg-background-0 border border-outline-100 shadow-lg">
+              <VStack space="xs" className="p-1">
+                <Pressable
+                  onPress={() => {
+                    setShowMenu(false);
+                    handleAddEquipment();
+                  }}
+                  className="p-3 rounded active:bg-background-50"
+                >
+                  <Text className="text-typography-700">
+                    Добавяне на оборудване
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    setShowMenu(false);
+                    handleMyEquipments();
+                  }}
+                  className="p-3 rounded active:bg-background-50"
+                >
+                  <Text className="text-typography-700">Моите оборудвания</Text>
+                </Pressable>
+                {user.role === "admin" && (
+                  <>
+                    <Box className="h-px w-full bg-background-200" />
+                    <Pressable
+                      onPress={() => {
+                        setShowMenu(false);
+                        handleAddCategory();
+                      }}
+                      className="p-3 rounded active:bg-background-50"
+                    >
+                      <Text className="text-typography-700">
+                        Добавяне на категория
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setShowMenu(false);
+                        handleAddSubCategoryClick();
+                      }}
+                      className="p-3 rounded active:bg-background-50"
+                    >
+                      <Text className="text-typography-700">
+                        Добавяне на подкатегория
+                      </Text>
+                    </Pressable>
+                  </>
+                )}
+                <Box className="h-px w-full bg-background-200" />
+                <Pressable
+                  onPress={() => {
+                    handleThemeChange(
+                      colorMode === ThemeMode.DARK
+                        ? ThemeMode.LIGHT
+                        : ThemeMode.DARK
+                    );
+                  }}
+                  className="p-3 rounded active:bg-background-50"
+                >
+                  <HStack space="sm" className="items-center">
+                    {colorMode === ThemeMode.DARK ? (
+                      <SunIcon
+                        width={18}
+                        height={18}
+                        className="text-typography-700"
+                      />
+                    ) : (
+                      <MoonIcon
+                        width={18}
+                        height={18}
+                        className="text-typography-700"
+                      />
+                    )}
                     <Text className="text-typography-700">
-                      Добавяне на категория
+                      {colorMode === ThemeMode.DARK
+                        ? "Светла тема"
+                        : "Тъмна тема"}
                     </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      setShowMenu(false);
-                      handleAddSubCategoryClick();
-                    }}
-                    className="p-3 rounded active:bg-background-50"
-                  >
-                    <Text className="text-typography-700">
-                      Добавяне на подкатегория
-                    </Text>
-                  </Pressable>
-                </>
-              )}
-              <Box className="h-px w-full bg-background-200" />
-              <Pressable
-                onPress={() => {
-                  setShowMenu(false);
-                  handleLogout();
-                }}
-                className="p-3 rounded active:bg-background-50"
-              >
-                <Text className="text-typography-700">Излез</Text>
-              </Pressable>
-            </VStack>
-          </Card>
+                  </HStack>
+                </Pressable>
+                <Box className="h-px w-full bg-background-200" />
+                <Pressable
+                  onPress={() => {
+                    setShowMenu(false);
+                    handleLogout();
+                  }}
+                  className="p-3 rounded active:bg-background-50"
+                >
+                  <Text className="text-typography-700">Излез</Text>
+                </Pressable>
+              </VStack>
+            </Card>
+          </Box>
         )}
       </Box>
 

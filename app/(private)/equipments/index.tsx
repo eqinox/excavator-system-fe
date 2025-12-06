@@ -52,7 +52,7 @@ export default function Equipments() {
   };
 
   return (
-    <VStack className="flex-1 justify-start bg-background-300 px-4">
+    <>
       <VStack space="xl" className="w-full max-w-4xl">
         <VStack space="md" className="mb-4 mt-4">
           <HStack className="justify-between">
@@ -113,6 +113,6 @@ export default function Equipments() {
           </VStack>
         </VStack>
       </VStack>
-    </VStack>
+    </>
   );
 }

@@ -3,8 +3,10 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   createEquipment,
   deleteEquipment,
+  fetchEquipmentsByOwnerId,
   fetchEquipmentsBySubCategoryId,
   findEquipmentById,
+  updateEquipment,
 } from "../thunks/fetchEquipments";
 
 export interface EquipmentsState {
@@ -101,6 +103,49 @@ export const equipmentsSlice = createSlice({
     builder.addCase(findEquipmentById.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.error.message || "Failed to fetch equipment";
+      state.message = "";
+    });
+
+    // Fetch equipments by owner ID
+    builder.addCase(fetchEquipmentsByOwnerId.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+      state.message = "";
+    });
+    builder.addCase(fetchEquipmentsByOwnerId.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.equipments = action.payload as EquipmentResponseDto[];
+      state.error = null;
+    });
+    builder.addCase(fetchEquipmentsByOwnerId.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to fetch equipments";
+      state.message = "";
+    });
+
+    // Update equipment
+    builder.addCase(updateEquipment.pending, (state, action) => {
+      state.isLoading = true;
+      state.error = null;
+      state.message = "";
+    });
+    builder.addCase(updateEquipment.fulfilled, (state, action) => {
+      state.isLoading = false;
+      const updatedEquipment = action.payload as EquipmentResponseDto;
+      const index = state.equipments.findIndex(
+        (eq) => eq.id === updatedEquipment.id
+      );
+      if (index !== -1) {
+        state.equipments[index] = updatedEquipment;
+      }
+      if (state.selectedEquipment?.id === updatedEquipment.id) {
+        state.selectedEquipment = updatedEquipment;
+      }
+      state.error = null;
+    });
+    builder.addCase(updateEquipment.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.error.message || "Failed to update equipment";
       state.message = "";
     });
   },

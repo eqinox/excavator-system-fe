@@ -31,7 +31,7 @@ export default function EquipmentDetailView({
             <VStack space="lg" className="w-full">
               {/* Header with Back Button */}
               <HStack className="items-center justify-between mb-4">
-                <Button variant="ghost" size="sm" onPress={handleBack}>
+                <Button size="sm" onPress={handleBack}>
                   <ButtonText>← Назад</ButtonText>
                 </Button>
                 <Text className="text-2xl font-bold text-typography-900 flex-1 text-center">
